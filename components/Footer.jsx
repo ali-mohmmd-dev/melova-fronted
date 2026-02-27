@@ -51,13 +51,10 @@ export default function Footer() {
                   </h3>
                   <p></p>
                 </div>
-                {/* Footer Contact Item End */}
+               
               </div>
-              {/* Footer About End */}
 
-              {/* Footer Newsletter Form Start */}
               <div className="footer-newsletter-form">
-                {/* Footer Social Links Start */}
                 <div className="footer-social-links">
                   <h3>Follow Us On Socials:</h3>
                   <ul className="list-inline">
