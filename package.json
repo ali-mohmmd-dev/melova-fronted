@@ -1,13 +1,12 @@
 {
-  "name": "my-melova",
+  "name": "next-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check",
-    "format": "biome format --write"
+    "lint": "eslint"
   },
   "dependencies": {
     "next": "16.1.6",
@@ -15,9 +14,8 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.0",
-    "@tailwindcss/postcss": "^4",
     "babel-plugin-react-compiler": "1.0.0",
-    "tailwindcss": "^4"
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6"
   }
 }
