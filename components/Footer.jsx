@@ -12,7 +12,6 @@ export default function Footer() {
         >
           <path
             d="M241.283 15.337C98.3615 29.6176 20.877 18.502 0 11.1592V48H768V21.4138C646.845 -9.72996 419.936 -2.51371 241.283 15.337Z"
-
           ></path>
         </svg>
       </div>
@@ -52,10 +51,13 @@ export default function Footer() {
                   </h3>
                   <p></p>
                 </div>
-               
+                {/* Footer Contact Item End */}
               </div>
+              {/* Footer About End */}
 
+              {/* Footer Newsletter Form Start */}
               <div className="footer-newsletter-form">
+                {/* Footer Social Links Start */}
                 <div className="footer-social-links">
                   <h3>Follow Us On Socials:</h3>
                   <ul className="list-inline">
