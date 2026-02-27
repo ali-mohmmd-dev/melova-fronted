@@ -23,7 +23,7 @@ export default function Header() {
 
   return (
     <>
-      <style jsx>{`
+      <style jsx global>{`
         .main-menu ul li a {
           font-size: 20px;
           font-weight: 700;
@@ -242,7 +242,7 @@ export default function Header() {
               </Link>
             </div>
           </div>
-          {/* Dark Overlay */}
+      
           <div
             className={`overlay ${sideMenuOpen ? "active" : ""}`}
             onClick={() => setSideMenuOpen(false)}

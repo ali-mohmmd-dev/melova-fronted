@@ -12,7 +12,7 @@ export default function Footer() {
         >
           <path
             d="M241.283 15.337C98.3615 29.6176 20.877 18.502 0 11.1592V48H768V21.4138C646.845 -9.72996 419.936 -2.51371 241.283 15.337Z"
-            fill="currentColor"
+
           ></path>
         </svg>
       </div>
@@ -20,15 +20,12 @@ export default function Footer() {
         <div className="container-fluid text-center">
           <div className="row">
             <div className="col-lg-12 text-center">
-              {/* Footer About Start */}
               <div className="footer-about">
-                {/* Footer Logo Start */}
                 <div className="footer-logo mb-3">
                   <img src="/img/melova_logo.png" alt="Melova Logo" />
                 </div>
-                {/* Footer Logo End */}
 
-                {/* Footer Menu Start */}
+
                 <div className="footer-menu mb-3">
                   <ul className="list-inline text-center">
                     <li className="list-inline-item">
@@ -48,22 +45,17 @@ export default function Footer() {
                     </li>
                   </ul>
                 </div>
-                {/* Footer Menu End */}
-
-                {/* Footer Contact Item Start */}
+          
                 <div className="footer-contact-item mb-3">
                   <h3>
                     <a href="tel:+971543072440">+971 54 307 2440</a>
                   </h3>
                   <p></p>
                 </div>
-                {/* Footer Contact Item End */}
+               
               </div>
-              {/* Footer About End */}
 
-              {/* Footer Newsletter Form Start */}
               <div className="footer-newsletter-form">
-                {/* Footer Social Links Start */}
                 <div className="footer-social-links">
                   <h3>Follow Us On Socials:</h3>
                   <ul className="list-inline">
@@ -89,22 +81,18 @@ export default function Footer() {
                     </li>
                   </ul>
                 </div>
-                {/* Footer Social Links End */}
               </div>
-              {/* Footer Newsletter Form End */}
             </div>
 
             <div className="col-lg-12">
-              {/* Footer Copyright Start */}
               <div className="footer-copyright">
                 <div className="footer-copyright-text">
                   <p>Copyright © 2025 All Rights Reserved.</p>
                 </div>
               </div>
-              {/* Footer Copyright End */}
             </div>
           </div>
-        </div>
+        </div>  
       </footer>
     </>
   );
