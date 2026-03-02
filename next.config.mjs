@@ -2,6 +2,9 @@
 const nextConfig = {
   /* config options here */
   reactCompiler: true,
+  compiler: {
+    styledJsx: true,
+  },
 };
 
 export default nextConfig;

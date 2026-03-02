@@ -1,15 +1,43 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const { user, login, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/");
+    }
+  }, [user, authLoading, router]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate login
-    alert("Login not implemented in static version yet.");
+    setError("");
+    setLoading(true);
+
+    try {
+      const role = await login(email, password);
+
+      if (role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
+      const msg = err.response?.data?.error || "Invalid email or password.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,13 +95,16 @@ export default function Login() {
           margin-bottom: 1.5rem;
         }
         .form-control {
+          width: 100%;
           border: 2px solid #e9ecef;
           border-radius: 10px;
           padding: 0.75rem 1rem;
           font-size: 0.95rem;
           transition: all 0.3s ease;
+          box-sizing: border-box;
         }
         .form-control:focus {
+          outline: none;
           border-color: #8B4513;
           box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.1);
         }
@@ -117,10 +148,41 @@ export default function Login() {
           font-size: 1rem;
           transition: all 0.3s ease;
           margin-bottom: 1rem;
+          cursor: pointer;
         }
-        .btn-login:hover {
+        .btn-login:hover:not(:disabled) {
           transform: translateY(-2px);
           box-shadow: 0 10px 25px rgba(139, 69, 19, 0.3);
+        }
+        .btn-login:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+        .error-message {
+          background: #ffeaea;
+          border: 1px solid #f5c6cb;
+          color: #721c24;
+          padding: 0.75rem 1rem;
+          border-radius: 10px;
+          font-size: 0.9rem;
+          margin-bottom: 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .spinner {
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(255,255,255,0.3);
+          border-top-color: white;
+          border-radius: 50%;
+          animation: spin 0.7s linear infinite;
+          margin-right: 8px;
+          vertical-align: middle;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
         .divider {
           text-align: center;
@@ -162,7 +224,18 @@ export default function Login() {
           text-decoration: none;
           font-size: 0.9rem;
         }
+        .role-badge {
+          display: inline-block;
+          font-size: 0.75rem;
+          padding: 0.2rem 0.6rem;
+          border-radius: 20px;
+          margin-left: 0.5rem;
+          font-weight: 600;
+        }
+        .role-admin { background: #fff3cd; color: #856404; }
+        .role-user  { background: #d1ecf1; color: #0c5460; }
       `}</style>
+
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
@@ -174,6 +247,12 @@ export default function Login() {
             <h1>Welcome Back</h1>
             <p>Login to access your account</p>
           </div>
+
+          {error && (
+            <div className="error-message">
+              <i className="fas fa-exclamation-circle"></i> {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -220,8 +299,16 @@ export default function Login() {
               </a>
             </div>
 
-            <button type="submit" className="btn btn-login">
-              <i className="fas fa-sign-in-alt"></i> Login
+            <button type="submit" className="btn btn-login" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="spinner"></span> Logging in...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-sign-in-alt"></i> Login
+                </>
+              )}
             </button>
           </form>
 

@@ -1,5 +1,6 @@
 import Script from "next/script";
-
+import { AuthProvider } from "../context/AuthContext";
+import StyledJsxRegistry from "../lib/StyledJsxRegistry";
 export const metadata = {
   title: "MyMelova | Premium Chocolate Factory & Artisanal Chocolates",
   description: "Discover MyMelova, a premium chocolate factory crafting artisanal chocolates and cocoa delights. Indulge in our handcrafted creations made from the finest ingredients.",
@@ -7,7 +8,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
         <link rel="preconnect" href="https://fonts.googleapis.com/" />
@@ -23,14 +24,20 @@ export default function RootLayout({ children }) {
         <link rel="stylesheet" href="/css/magnific-popup.css" />
         <link rel="stylesheet" href="/css/mousecursor.css" />
         <link href="/css/custom.css" rel="stylesheet" media="screen" />
+        <link href="/css/header.css" rel="stylesheet" />
       </head>
-      <body>
-        {children}
-        
+  <body>
+
+  
+        <AuthProvider>
+          <StyledJsxRegistry>
+            {children}
+          </StyledJsxRegistry>
+        </AuthProvider>
+
         <Script src="https://code.jquery.com/jquery-3.7.1.min.js" strategy="beforeInteractive" />
         <Script src="/js/gsap.min.js" strategy="beforeInteractive" />
         <Script src="/js/ScrollTrigger.min.js" strategy="beforeInteractive" />
-        
         <Script src="/js/bootstrap.min.js" strategy="lazyOnload" />
         <Script src="/js/validator.min.js" strategy="lazyOnload" />
         <Script src="/js/jquery.slicknav.js" strategy="lazyOnload" />
@@ -40,13 +47,13 @@ export default function RootLayout({ children }) {
         <Script src="/js/jquery.magnific-popup.min.js" strategy="lazyOnload" />
         <Script src="/js/SmoothScroll.js" strategy="lazyOnload" />
         <Script src="/js/parallaxie.js" strategy="lazyOnload" />
-        {/* <Script src="/js/magiccursor.js" strategy="lazyOnload" /> */} {/* Removed due to React setState conflict */}
         <Script src="/js/SplitText.js" strategy="lazyOnload" />
         <Script src="/js/jquery.mb.YTPlayer.min.js" strategy="lazyOnload" />
         <Script src="/js/wow.min.js" strategy="lazyOnload" />
         <Script src="/js/function.js" strategy="lazyOnload" />
         <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" strategy="lazyOnload" />
         <Script src="https://cdn.jsdelivr.net/npm/chart.js" strategy="lazyOnload" />
+
       </body>
     </html>
   );
