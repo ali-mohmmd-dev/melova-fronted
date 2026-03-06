@@ -27,49 +27,55 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
+  const handleAuthSuccess = (authPayload) => {
+    const { token, refresh, role, user } = authPayload;
+
+    setToken(token);
+    setRole(role);
+    setUser(user);
+
+    localStorage.setItem("melova_token", token);
+    localStorage.setItem("melova_refresh", refresh);
+    localStorage.setItem("melova_role", role);
+    localStorage.setItem("melova_user", JSON.stringify(user));
+
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+    return role;
+  };
+
   const login = async (email, password) => {
     const res = await axios.post(`${API_URL}api/auth/login/`, {
       email,
       password,
     });
-    // Backend returns { token, refresh, role, user }
-    const { token, refresh, role, user } = res.data;
 
-    setToken(token);
-    setRole(role);
-    setUser(user);
-
-    localStorage.setItem("melova_token", token);
-    localStorage.setItem("melova_refresh", refresh);
-    localStorage.setItem("melova_role", role);
-    localStorage.setItem("melova_user", JSON.stringify(user));
-
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    return role;
+    return handleAuthSuccess(res.data);
   };
 
-  const register = async (formData) => {
-    const res = await axios.post(`${API_URL}api/auth/register/`, {
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      email: formData.email,
-      phone: formData.phone,
-      password: formData.password,
+  const register = async (payload) => {
+    const res = await axios.post(`${API_URL}api/auth/register/`, payload);
+    return handleAuthSuccess(res.data);
+  };
+
+  const loginWithGoogle = async (googleIdToken) => {
+    const res = await axios.post(`${API_URL}api/auth/google-login/`, {
+      id_token: googleIdToken,
     });
 
-    const { token, refresh, role, user } = res.data;
+    return handleAuthSuccess(res.data);
+  };
 
-    setToken(token);
-    setRole(role);
-    setUser(user);
+  const updateProfile = async (payload) => {
+    const accessToken = localStorage.getItem("melova_token");
+    const res = await axios.put(`${API_URL}api/auth/profile/update/`, payload, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-    localStorage.setItem("melova_token", token);
-    localStorage.setItem("melova_refresh", refresh);
-    localStorage.setItem("melova_role", role);
-    localStorage.setItem("melova_user", JSON.stringify(user));
-
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    return role;
+    const updatedUser = res.data.user;
+    setUser(updatedUser);
+    localStorage.setItem("melova_user", JSON.stringify(updatedUser));
+    return updatedUser;
   };
 
   const logout = async () => {
@@ -100,7 +106,17 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, role, token, login, register, logout, loading }}
+      value={{
+        user,
+        role,
+        token,
+        login,
+        register,
+        loginWithGoogle,
+        logout,
+        updateProfile,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -9,8 +9,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  const { user, login, loading: authLoading } = useAuth();
+  const { user, login, loginWithGoogle, loading: authLoading } = useAuth();
   const router = useRouter();
 
   React.useEffect(() => {
@@ -39,6 +40,55 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const handleGoogleCredential = async (credential) => {
+    setError("");
+    setGoogleLoading(true);
+    try {
+      const role = await loginWithGoogle(credential);
+      if (role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
+      const msg =
+        err.response?.data?.error || "Google sign-in failed. Please try again.";
+      setError(msg);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (!window.google || !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+      return;
+    }
+
+    try {
+      window.google.accounts.id.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        callback: (response) => {
+          if (response.credential) {
+            handleGoogleCredential(response.credential);
+          }
+        },
+      });
+
+      const buttonContainer = document.getElementById("googleSignInButton");
+      if (buttonContainer) {
+        window.google.accounts.id.renderButton(buttonContainer, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "pill",
+        });
+      }
+    } catch (e) {
+      console.error("Failed to initialize Google Identity Services", e);
+    }
+  }, []);
 
   return (
     <div className="login-page-wrapper">
@@ -314,6 +364,48 @@ export default function Login() {
 
           <div className="divider">
             <span>or</span>
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <button
+              type="button"
+              className="btn btn-login"
+              style={{
+                background: "#fff",
+                color: "#444",
+                border: "1px solid #dadce0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+              }}
+              onClick={() => {
+                if (window.google && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+                  window.google.accounts.id.prompt();
+                } else {
+                  setError(
+                    "Google Sign-In is not configured. Please try again later.",
+                  );
+                }
+              }}
+              disabled={googleLoading}
+            >
+              {googleLoading ? (
+                <>
+                  <span className="spinner"></span> Signing in with Google...
+                </>
+              ) : (
+                <>
+                  <img
+                    src="https://developers.google.com/identity/images/g-logo.png"
+                    alt="Google"
+                    style={{ width: 18, height: 18 }}
+                  />
+                  Continue with Google
+                </>
+              )}
+            </button>
+            <div id="googleSignInButton" style={{ display: "none" }} />
           </div>
 
           <div className="signup-link">

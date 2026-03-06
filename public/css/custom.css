@@ -102,6 +102,10 @@ p {
 	margin-bottom: 1.5em;
 }
 
+.bg-bg-color {
+	background-color: var(--bg-color);
+}
+
 h1,
 h2,
 h3,
@@ -842,7 +846,7 @@ header.main-header .header-sticky.active {
 	background-size: cover;
 	overflow: hidden;
 	margin: 0px;
-	height: calc(100vh - 100px);
+	height: 100svh;
 }
 
 .hero.hero-bg-image .hero-box::before {
@@ -6916,10 +6920,7 @@ header.main-header .header-sticky.active {
 		font-size: 18px;
 	}
 
-	.product-image img {
-		width: 180px;
-		height: 180px;
-	}
+	
 
 	.product-item-content h3,
 	.product-item-content h2 {

@@ -17,14 +17,13 @@ export default function Signup() {
   const [passwordStrength, setPasswordStrength] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  const { user, register, loading: authLoading } = useAuth();
+  const { user, register, loginWithGoogle, loading: authLoading } = useAuth();
   const router = useRouter();
 
   React.useEffect(() => {
-    if (!authLoading && user) {
-      router.push("/");
-    }
+    if (!authLoading && user) router.push("/");
   }, [user, authLoading, router]);
 
   const handleInputChange = (e) => {
@@ -38,347 +37,304 @@ export default function Signup() {
       if (/[a-z]/.test(value) && /[A-Z]/.test(value)) strength++;
       if (/\d/.test(value)) strength++;
       if (/[^a-zA-Z\d]/.test(value)) strength++;
-
       if (strength <= 2) setPasswordStrength("weak");
       else if (strength <= 4) setPasswordStrength("medium");
       else setPasswordStrength("strong");
-
       if (value.length === 0) setPasswordStrength("");
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const payload = {
+      email: formData.email,
+      name: `${formData.firstName} ${formData.lastName}`,
+      phone: formData.phone,
+      password: formData.password,
+      password2: formData.confirmPassword,   // ← backend expects "password2"
+    };
+     
+    const role = await register(payload);
+    router.push(role === "admin" ? "/admin/dashboard" : "/");
+  } catch (err) {
+    const data = err.response?.data;
+    setError(
+      data
+        ? Object.values(data).flat().join(" ")
+        : "Registration failed. Please try again.",
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleGoogleCredential = async (credential) => {
     setError("");
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!");
-      return;
-    }
-
-    setLoading(true);
+    setGoogleLoading(true);
     try {
-      const role = await register(formData); // ✅ calls Django /api/auth/register/
-
-      // New users are always "user" role → go to shop
-      if (role === "admin") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/");
-      }
+      const role = await loginWithGoogle(credential);
+      router.push(role === "admin" ? "/admin" : "/");
     } catch (err) {
-      // ✅ Show Django validation errors
-      const data = err.response?.data;
-      if (data) {
-        const messages = Object.values(data).flat().join(" ");
-        setError(messages);
-      } else {
-        setError("Registration failed. Please try again.");
-      }
+      setError(err.response?.data?.error || "Google sign-in failed.");
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
-  return (
-    <div className="signup-page-wrapper">
-      <style>{`
-        .signup-page-wrapper {
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 4rem 0;
-        }
-        .signup-container {
-          max-width: 500px;
-          width: 100%;
-          padding: 2rem;
-        }
-        .signup-card {
-          background: white;
-          border-radius: 20px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-          padding: 3rem 2.5rem;
-          position: relative;
-          overflow: hidden;
-        }
-        .signup-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 5px;
-          background: linear-gradient(90deg, #8B4513 0%, #D2691E 100%);
-        }
-        .signup-header {
-          text-align: center;
-          margin-bottom: 2rem;
-        }
-        .signup-logo { width: 120px; margin-bottom: 1rem; }
-        .signup-header h1 {
-          font-size: 1.8rem;
-          font-weight: 700;
-          color: #2c3e50;
-          margin-bottom: 0.5rem;
-        }
-        .signup-header p { color: #6c757d; font-size: 0.95rem; }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-        .form-row .form-group { margin-bottom: 0; }
-        .form-control {
-          width: 100%;
-          border: 2px solid #e9ecef;
-          border-radius: 10px;
-          padding: 0.75rem 1rem;
-          font-size: 0.95rem;
-          transition: all 0.3s ease;
-          box-sizing: border-box;
-        }
-        .form-control:focus {
-          outline: none;
-          border-color: #8B4513;
-          box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.1);
-        }
-        .input-icon { position: relative; }
-        .input-icon i {
-          position: absolute;
-          right: 1rem;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #6c757d;
-        }
-        .input-icon input { padding-right: 2.5rem; }
-        .btn-signup {
-          width: 100%;
-          background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-          border: none;
-          color: white;
-          padding: 0.875rem;
-          border-radius: 10px;
-          font-weight: 600;
-          font-size: 1rem;
-          transition: all 0.3s ease;
-          margin-bottom: 1rem;
-          cursor: pointer;
-        }
-        .btn-signup:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(139, 69, 19, 0.3);
-        }
-        .btn-signup:disabled { opacity: 0.7; cursor: not-allowed; }
-        .error-message {
-          background: #ffeaea;
-          border: 1px solid #f5c6cb;
-          color: #721c24;
-          padding: 0.75rem 1rem;
-          border-radius: 10px;
-          font-size: 0.9rem;
-          margin-bottom: 1.5rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-        .spinner {
-          display: inline-block;
-          width: 16px; height: 16px;
-          border: 2px solid rgba(255,255,255,0.3);
-          border-top-color: white;
-          border-radius: 50%;
-          animation: spin 0.7s linear infinite;
-          margin-right: 8px;
-          vertical-align: middle;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .divider {
-          text-align: center;
-          margin: 1.5rem 0;
-          position: relative;
-        }
-        .divider::before {
-          content: '';
-          position: absolute;
-          left: 0; top: 50%;
-          width: 100%; height: 1px;
-          background: #e9ecef;
-        }
-        .divider span {
-          background: white;
-          padding: 0 1rem;
-          color: #6c757d;
-          font-size: 0.9rem;
-          position: relative;
-        }
-        .login-link { text-align: center; color: #6c757d; font-size: 0.95rem; }
-        .login-link a { color: #8B4513; text-decoration: none; font-weight: 600; }
-        .back-home { text-align: center; margin-top: 1.5rem; }
-        .back-home a { color: #6c757d; text-decoration: none; font-size: 0.9rem; }
-        .password-strength {
-          height: 4px;
-          background: #e9ecef;
-          border-radius: 2px;
-          margin-top: 0.5rem;
-          overflow: hidden;
-        }
-        .password-strength-bar {
-          height: 100%;
-          width: 0%;
-          transition: all 0.3s ease;
-        }
-        .password-strength-bar.weak   { width: 33%; background: #e74c3c; }
-        .password-strength-bar.medium { width: 66%; background: #f39c12; }
-        .password-strength-bar.strong { width: 100%; background: #27ae60; }
-        .strength-label {
-          font-size: 0.78rem;
-          margin-top: 0.3rem;
-          font-weight: 500;
-        }
-      `}</style>
+  React.useEffect(() => {
+    if (!window.google || !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) return;
+    try {
+      window.google.accounts.id.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        callback: (response) => {
+          if (response.credential) handleGoogleCredential(response.credential);
+        },
+      });
+    } catch (e) {
+      console.error("Failed to initialize Google Identity Services", e);
+    }
+  }, []);
 
-      <div className="signup-container">
-        <div className="signup-card">
-          <div className="signup-header">
+  const strengthBar = {
+    weak: "w-1/3 bg-red-400",
+    medium: "w-2/3 bg-yellow-400",
+    strong: "w-full bg-green-500",
+  };
+
+  const inputClass =
+    "w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-amber-700 focus:bg-white focus:outline-none transition";
+
+  return (
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-8 py-10">
+          {/* Header */}
+          <div className="text-center mb-8">
             <img
               src="/img/melova_logo.png"
-              alt="MyMelova Logo"
-              className="signup-logo"
+              alt="MyMelova"
+              className="w-16 mx-auto mb-4"
             />
-            <h1>Create Account</h1>
-            <p>Join MyMelova and start your chocolate journey</p>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Create account
+            </h1>
+            <p className="text-sm text-gray-400 mt-1">
+              Start your chocolate journey today
+            </p>
           </div>
 
-          {/* ✅ Django error display */}
+          {/* Error */}
           {error && (
-            <div className="error-message">
-              <i className="fas fa-exclamation-circle"></i> {error}
+            <div className="mb-5 flex items-start gap-2 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+              <svg
+                className="mt-0.5 h-4 w-4 shrink-0"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            {/* First + Last Name in one row */}
-            <div className="form-row">
-              <div className="form-group">
-                <div className="input-icon">
-                  <input
-                    type="text"
-                    name="firstName"
-                    className="form-control"
-                    placeholder="First Name"
-                    required
-                    value={formData.firstName}
-                    onChange={handleInputChange}
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-3.5">
+            {/* Name row */}
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                className={inputClass}
+                type="text"
+                name="firstName"
+                placeholder="First name"
+                required
+                value={formData.firstName}
+                onChange={handleInputChange}
+              />
+              <input
+                className={inputClass}
+                type="text"
+                name="lastName"
+                placeholder="Last name"
+                required
+                value={formData.lastName}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <input
+              className={inputClass}
+              type="email"
+              name="email"
+              placeholder="Email address"
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+            />
+
+            <input
+              className={inputClass}
+              type="tel"
+              name="phone"
+              placeholder="Phone number"
+              required
+              value={formData.phone}
+              onChange={handleInputChange}
+            />
+
+            {/* Password + strength bar */}
+            <div>
+              <input
+                className={inputClass}
+                type="password"
+                name="password"
+                placeholder="Password"
+                required
+                value={formData.password}
+                onChange={handleInputChange}
+              />
+              {passwordStrength && (
+                <div className="mt-1.5 h-1 w-full rounded-full bg-gray-100 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${strengthBar[passwordStrength]}`}
                   />
-                  <i className="fas fa-user"></i>
                 </div>
-              </div>
-              <div className="form-group">
-                <div className="input-icon">
-                  <input
-                    type="text"
-                    name="lastName"
-                    className="form-control"
-                    placeholder="Last Name"
-                    required
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                  />
-                  <i className="fas fa-user"></i>
-                </div>
-              </div>
+              )}
             </div>
 
-            <div className="form-group">
-              <div className="input-icon">
-                <input
-                  type="email"
-                  name="email"
-                  className="form-control"
-                  placeholder="Email Address"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
-                />
-                <i className="fas fa-envelope"></i>
-              </div>
-            </div>
+            <input
+              className={inputClass}
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm password"
+              required
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+            />
 
-            <div className="form-group">
-              <div className="input-icon">
-                <input
-                  type="tel"
-                  name="phone"
-                  className="form-control"
-                  placeholder="Phone Number"
-                  required
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                />
-                <i className="fas fa-phone"></i>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <div className="input-icon">
-                <input
-                  type="password"
-                  name="password"
-                  className="form-control"
-                  placeholder="Password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                />
-                <i className="fas fa-lock"></i>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <div className="input-icon">
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  className="form-control"
-                  placeholder="Confirm Password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                />
-                <i className="fas fa-lock"></i>
-              </div>
-            </div>
-
-            {/* ✅ Loading spinner while registering */}
-            <button type="submit" className="btn btn-signup" disabled={loading}>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-lg bg-amber-800 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-900 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
               {loading ? (
                 <>
-                  <span className="spinner"></span> Creating Account...
+                  <svg
+                    className="h-4 w-4 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    />
+                  </svg>
+                  Creating account…
                 </>
               ) : (
-                <>
-                  <i className="fas fa-user-plus"></i> Create Account
-                </>
+                "Create account"
               )}
             </button>
           </form>
 
-          <div className="divider">
-            <span>or</span>
+          {/* Divider */}
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-100" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-white px-3 text-xs text-gray-400">or</span>
+            </div>
           </div>
 
-          <div className="login-link">
-            Already have an account? <Link href="/login">Login</Link>
-          </div>
+          {/* Google */}
+          <button
+            type="button"
+            disabled={googleLoading}
+            onClick={() => {
+              if (window.google && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+                window.google.accounts.id.prompt();
+              } else {
+                setError("Google Sign-In is not configured.");
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2.5 rounded-lg border border-gray-200 bg-white py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {googleLoading ? (
+              <>
+                <svg
+                  className="h-4 w-4 animate-spin text-gray-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+                Signing up…
+              </>
+            ) : (
+              <>
+                <img
+                  src="https://developers.google.com/identity/images/g-logo.png"
+                  alt="Google"
+                  className="h-4 w-4"
+                />
+                Continue with Google
+              </>
+            )}
+          </button>
+          <div id="googleSignUpButton" className="hidden" />
 
-          <div className="back-home">
-            <Link href="/">
-              <i className="fas fa-arrow-left"></i> Back to Home
+          {/* Footer links */}
+          <p className="mt-6 text-center text-sm text-gray-400">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-amber-800 hover:text-amber-900 transition"
+            >
+              Log in
             </Link>
-          </div>
+          </p>
+          <p className="mt-2 text-center text-sm">
+            <Link
+              href="/"
+              className="text-gray-400 hover:text-gray-500 transition"
+            >
+              ← Back to home
+            </Link>
+          </p>
         </div>
       </div>
     </div>
