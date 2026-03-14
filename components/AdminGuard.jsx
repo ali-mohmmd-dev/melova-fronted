@@ -4,14 +4,20 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function AdminGuard({ children }) {
-  const { user, role, loading } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || role !== "admin")) {
+    console.log("AdminGuard - User:", user);
+    console.log("AdminGuard - Loading:", loading);
+    const isAllowed = user?.is_staff || user?.is_superuser;
+    console.log("AdminGuard - isAllowed:", isAllowed);
+    
+    if (!loading && (!user || !isAllowed)) {
+      console.log("AdminGuard - Redirecting to /");
       router.push("/");
     }
-  }, [user, role, loading, router]);
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -26,7 +32,8 @@ export default function AdminGuard({ children }) {
     );
   }
 
-  if (!user || role !== "admin") {
+  const isAllowed = user?.is_staff || user?.is_superuser;
+  if (!user || !isAllowed) {
     return null;
   }
 

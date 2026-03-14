@@ -28,20 +28,26 @@ export function AuthProvider({ children }) {
   }, []);
 
   const handleAuthSuccess = (authPayload) => {
-    const { token, refresh, role, user } = authPayload;
+    // Backend might return 'access' (SimpleJWT) or 'token'
+    const accessToken = authPayload.access || authPayload.token;
+    const { refresh, user } = authPayload;
 
-    setToken(token);
-    setRole(role);
+    // Determine role for backward compatibility if needed, 
+    // but preference is to use user.is_staff / user.is_superuser
+    const userRole = user?.is_superuser ? "superadmin" : user?.is_staff ? "admin" : "user";
+
+    setToken(accessToken);
+    setRole(userRole);
     setUser(user);
 
-    localStorage.setItem("melova_token", token);
-    localStorage.setItem("melova_refresh", refresh);
-    localStorage.setItem("melova_role", role);
+    localStorage.setItem("melova_token", accessToken);
+    if (refresh) localStorage.setItem("melova_refresh", refresh);
+    localStorage.setItem("melova_role", userRole);
     localStorage.setItem("melova_user", JSON.stringify(user));
 
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
-    return role;
+    return userRole;
   };
 
   const login = async (email, password) => {

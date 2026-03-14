@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="relative bg-[#562c1b] pt-16 pb-8 overflow-hidden">
-      {"/* Decorative Top Wave */"}
+      {/* Decorative Top Wave */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-none rotate-180">
         <svg
           className="relative block w-full h-12"
@@ -18,7 +18,6 @@ export default function Footer() {
           ></path>
         </svg>
       </div>
-6
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         <div className="flex flex-col items-center">
           {/* Logo */}

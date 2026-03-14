@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import AuthGuard from "@/components/AuthGuard";
 import Link from "next/link";
+import AuthGuard from "@/components/AuthGuard";          
 
 export default function ProfilePage() {
   const { user, logout, updateProfile } = useAuth();
