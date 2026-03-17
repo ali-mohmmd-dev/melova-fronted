@@ -71,17 +71,23 @@ export default function AdminAddProduct() {
     );
   };
 
-  const updateImage = (variantId, imageIndex, value) => {
+  const updateImage = (variantId, imageIndex, file) => {
     setVariants(
       variants.map((v) => {
         if (v.id === variantId) {
           const newImages = [...v.images];
-          newImages[imageIndex] = value;
+          newImages[imageIndex] = file; // store File object
           return { ...v, images: newImages };
         }
         return v;
       }),
     );
+  };
+
+  const getImagePreview = (img) => {
+    if (!img) return null;
+    if (typeof img === "string") return img || null;
+    return URL.createObjectURL(img);
   };
 
   const handleSubmit = (e) => {
@@ -384,7 +390,7 @@ export default function AdminAddProduct() {
                           className="btn btn-sm btn-outline-secondary"
                           onClick={() => addImageToVariant(variant.id)}
                         >
-                          <i className="fas fa-plus me-1"></i> Add URL
+                          <i className="fas fa-plus me-1"></i> Add Image
                         </button>
                       </div>
 
@@ -393,19 +399,19 @@ export default function AdminAddProduct() {
                           <div className="col-lg-6" key={imgIndex}>
                             <div className="variant-image-input-group">
                               <img
-                                src={imgUrl || '/img/placeholder.png'}
+                                src={getImagePreview(imgUrl) || "https://placehold.co/100x100?text=No+Image"}
                                 className="variant-image-preview"
                                 alt="Preview"
                                 onError={(e) => (e.target.src = "https://placehold.co/100x100?text=No+Image")}
                               />
                               <input
-                                type="text"
+                                type="file"
+                                accept="image/*"
                                 className="form-control form-control-sm"
-                                placeholder="Image URL (e.g. /img/dark-choc.jpg)"
-                                value={imgUrl}
-                                onChange={(e) =>
-                                  updateImage(variant.id, imgIndex, e.target.value)
-                                }
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) updateImage(variant.id, imgIndex, file);
+                                }}
                               />
                               {variant.images.length > 1 && (
                                 <button

@@ -64,7 +64,7 @@ export default async function Products() {
                             <i className="fa-solid fa-star"></i>
                           </div>
                           <div className="product-item-content">
-                            <h2>{product.name}</h2>
+                            <h2>{product.title}</h2>
                           </div>
                         </div>
                       </div>

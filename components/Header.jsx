@@ -42,11 +42,10 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-white/5 ${
-          scrolled || !isHome
-            ? "bg-[#562c1b] backdrop-blur-md shadow-lg py-3 border-b"
-            : "bg-[transparent] backdrop-blur-sm py-5"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-white/5 ${scrolled || !isHome
+          ? "bg-[#562c1b] backdrop-blur-md shadow-lg py-3 border-b"
+          : "bg-[transparent] backdrop-blur-sm py-5"
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
@@ -56,9 +55,8 @@ export default function Header() {
                 <img
                   src="/img/melova_logo.png"
                   alt="Melova Logo"
-                  className={`transition-all duration-300 w-auto drop-shadow-lg ${
-                    scrolled ? "h-12" : "h-14"
-                  }`}
+                  className={`transition-all duration-300 w-auto drop-shadow-lg ${scrolled ? "h-12" : "h-14"
+                    }`}
                 />
               </Link>
             </div>
@@ -107,30 +105,28 @@ export default function Header() {
                           : "User"}
                       </span>
                       <i
-                        className={`fas fa-chevron-down text-xs transition-transform duration-300 ${
-                          profileDropdownOpen ? "rotate-180" : ""
-                        }`}
+                        className={`fas fa-chevron-down text-xs transition-transform duration-300 ${profileDropdownOpen ? "rotate-180" : ""
+                          }`}
                       ></i>
                     </button>
 
                     {/* Dropdown Menu */}
                     <div
-                      className={`absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-stone-100 overflow-hidden transition-all duration-300 transform origin-top-right ${
-                        profileDropdownOpen
-                          ? "opacity-100 scale-100"
-                          : "opacity-0 scale-95 pointer-events-none"
-                      }`}
+                      className={`absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-stone-100 overflow-hidden transition-all duration-300 transform origin-top-right ${profileDropdownOpen
+                        ? "opacity-100 scale-100"
+                        : "opacity-0 scale-95 pointer-events-none"
+                        }`}
                     >
                       <div className="py-2">
-                        {role === "admin" && (
-                          <Link
-                            href="/admin"
-                            className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 hover:text-amber-600 transition-colors"
-                          >
-                            <i className="fas fa-tachometer-alt w-5 text-center mr-2 text-stone-400"></i>
-                            Dashboard
-                          </Link>
-                        )}
+                        {/* {user?.is_staff || user?.is_superuser && ( */}
+                        <Link
+                          href="/admin"
+                          className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 hover:text-amber-600 transition-colors"
+                        >
+                          <i className="fas fa-tachometer-alt w-5 text-center mr-2 text-stone-400"></i>
+                          Dashboard
+                        </Link>
+                        {/* )} */}
                         <Link
                           href="/profile"
                           className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 hover:text-amber-600 transition-colors"
@@ -209,17 +205,15 @@ export default function Header() {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden transition-opacity duration-300 ${
-          sideMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden transition-opacity duration-300 ${sideMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setSideMenuOpen(false)}
       ></div>
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-y-0 right-0 max-w-sm w-full bg-stone-900 shadow-2xl z-50 lg:hidden transform transition-transform duration-300 ease-in-out flex flex-col ${
-          sideMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed inset-y-0 right-0 max-w-sm w-full bg-stone-900 shadow-2xl z-50 lg:hidden transform transition-transform duration-300 ease-in-out flex flex-col ${sideMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between p-6 border-b border-white/10">
           <img
@@ -298,7 +292,7 @@ export default function Header() {
                   </div>
 
                   <div className="flex flex-col space-y-3 mt-4 px-2">
-                    {role === "admin" && (
+                    {(role === "admin" || role === "superadmin") && (
                       <Link
                         href="/admin"
                         className="flex items-center text-stone-300 hover:text-amber-400 transition-colors"

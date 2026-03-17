@@ -15,6 +15,7 @@ export default function AdminProducts() {
       try {
         // Attempt to load using our shared data fetching logic
         const data = await getProducts();
+        console.log("All products:", data);
         setProducts(data);
         setFilteredProducts(data);
       } catch (error) {
@@ -213,7 +214,7 @@ export default function AdminProducts() {
                         </div>
                       </td>
                       <td>
-                        <strong>{product.name}</strong>
+                        <strong>{product.title}</strong>
                       </td>
                       <td>
                         <div
@@ -221,7 +222,7 @@ export default function AdminProducts() {
                           style={{ maxWidth: "250px" }}
                         >
                           {product.intro && product.intro.length > 60
-                            ? `${product.intro.substring(0, 60)}...`
+                            ? `${product.introduction.substring(0, 60)}...`
                             : product.intro}
                         </div>
                       </td>

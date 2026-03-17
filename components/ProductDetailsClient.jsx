@@ -1,7 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProductDetailsClient({ product }) {
+  const router = useRouter();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
   const variants = product.variants || [];
@@ -17,37 +19,19 @@ export default function ProductDetailsClient({ product }) {
   // Swiper state
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const handleOrderNow = async (e) => {
+  const handleOrderNow = (e) => {
     e.preventDefault();
 
-    if (
-      window.confirm(
-        `Do you want to order ${product.name} for ₹${currentPrice}?`,
-      )
-    ) {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/api/shop/orders/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            customer_name: "Guest User",
-            email: "guest@example.com",
-            total: parseFloat(currentPrice),
-          }),
-        });
+    const orderData = {
+      productId: product.id,
+      productName: product.title || product.name,
+      variant: selectedVariant,
+      price: currentPrice,
+      image: currentImages[0],
+    };
 
-        if (response.ok) {
-          const data = await response.json();
-          alert("Order placed successfully! Order ID: " + data.order_id);
-        } else {
-          alert("Failed to place order. Make sure Django server is running.");
-        }
-      } catch (error) {
-        alert("Failed to place order. Make sure Django server is running.");
-      }
-    }
+    localStorage.setItem("pendingOrder", JSON.stringify(orderData));
+    router.push("/checkout");
   };
 
   return (
@@ -75,7 +59,7 @@ export default function ProductDetailsClient({ product }) {
                 >
                   <img
                     src={img}
-                    alt={`${product.name} image ${i + 1}`}
+                    alt={`${product.title || product.name} image ${i + 1}`}
                     style={{
                       width: "100%",
                       height: "auto",
@@ -143,7 +127,7 @@ export default function ProductDetailsClient({ product }) {
           data-wow-delay="0.2s"
         >
           <h1 id="productName" className="text-anime-style-2">
-            {product.name}
+            {product.title || product.name}
           </h1>
 
           <div className="product-price mt-3 mb-3">
@@ -154,7 +138,7 @@ export default function ProductDetailsClient({ product }) {
           </div>
 
           <div className="product-description mb-4">
-            <p className="lead">{product.intro}</p>
+            <p className="lead">{product.introduction || product.intro}</p>
             <p>{product.description}</p>
           </div>
 

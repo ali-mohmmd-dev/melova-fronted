@@ -10,8 +10,8 @@ export async function generateMetadata({ params }) {
   if (!product) return { title: "Product Not Found" };
 
   return {
-    title: `${product.name} | MyMelova Chocolate Factory`,
-    description: product.intro,
+    title: `${product.title || product.name} | MyMelova Chocolate Factory`,
+    description: product.introduction || product.intro,
   };
 }
 
