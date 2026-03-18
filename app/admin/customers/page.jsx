@@ -56,108 +56,140 @@ export default function AdminCustomers() {
   const viewCustomer = (id) => alert(`Viewing details for Customer #${id}`);
   const emailCustomer = (email) => (window.location.href = `mailto:${email}`);
 
-  return (
-    <div className="admin-content">
-      {/* Search */}
-      <div className="admin-card mb-4">
-        <div className="card-body">
-          <div className="row g-3">
-            <div className="col-md-9">
-              <div className="search-box">
-                <i className="fas fa-search"></i>
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{ paddingLeft: "35px" }}
-                  placeholder="Search customers by name, email, or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="col-md-3">
-              <button
-                className="btn btn-outline-secondary w-100"
-                onClick={resetFilters}
-              >
-                <i className="fas fa-redo"></i> Reset
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+ return (
+  <div className="p-6 space-y-6">
 
-      {/* Customers Table */}
-      <div className="admin-card">
-        <div className="card-header">
-          <h2>All Customers ({filteredCustomers.length})</h2>
+    {/* Search */}
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <div className="grid md:grid-cols-12 gap-3 items-center">
+
+        {/* Search Input */}
+        <div className="md:col-span-9 relative">
+          <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+          <input
+            type="text"
+            placeholder="Search customers by name, email, or phone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table customers-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Location</th>
-                  <th>Joined Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="7" className="text-center">
-                      Loading customers...
-                    </td>
-                  </tr>
-                ) : filteredCustomers.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="text-center">
-                      <p className="text-muted py-4">No customers found.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredCustomers.map((customer) => (
-                    <tr key={customer.id}>
-                      <td>#{customer.id}</td>
-                      <td>
-                        <strong>{customer.name}</strong>
-                      </td>
-                      <td>{customer.email}</td>
-                      <td>{customer.phone}</td>
-                      <td>
-                        {customer.city}, {customer.country}
-                      </td>
-                      <td>{formatDate(customer.created_at)}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            className="btn btn-sm btn-info me-1"
-                            onClick={() => viewCustomer(customer.id)}
-                            title="View Details"
-                          >
-                            <i className="fas fa-eye text-white"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-warning"
-                            onClick={() => emailCustomer(customer.email)}
-                            title="Email Customer"
-                          >
-                            <i className="fas fa-envelope text-white"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+
+        {/* Reset Button */}
+        <div className="md:col-span-3">
+          <button
+            onClick={resetFilters}
+            className="w-full border border-gray-300 rounded-lg py-2 text-sm font-medium hover:bg-gray-50"
+          >
+            <i className="fas fa-rotate-right mr-2"></i>
+            Reset
+          </button>
         </div>
+
       </div>
     </div>
-  );
+
+    {/* Customers Table */}
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <h2 className="font-semibold">
+          All Customers
+          <span className="text-gray-500 font-normal ml-2">
+            ({filteredCustomers.length})
+          </span>
+        </h2>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+
+          <thead>
+            <tr className="bg-gray-50 text-gray-600">
+              <th className="text-left px-4 py-2 font-semibold">ID</th>
+              <th className="text-left px-4 py-2 font-semibold">Name</th>
+              <th className="text-left px-4 py-2 font-semibold">Email</th>
+              <th className="text-left px-4 py-2 font-semibold">Phone</th>
+              <th className="text-left px-4 py-2 font-semibold">Location</th>
+              <th className="text-left px-4 py-2 font-semibold">Joined Date</th>
+              <th className="text-center px-4 py-2 font-semibold">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-100">
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="text-center py-8 text-gray-500">
+                  Loading customers...
+                </td>
+              </tr>
+            ) : filteredCustomers.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center py-8 text-gray-500">
+                  No customers found.
+                </td>
+              </tr>
+            ) : (
+              filteredCustomers.map((customer) => (
+                <tr key={customer.id} className="hover:bg-gray-50 transition">
+
+                  <td className="px-4 py-2 font-semibold">
+                    #{customer.id}
+                  </td>
+
+                  <td className="px-4 py-2 font-medium">
+                    {customer.name}
+                  </td>
+
+                  <td className="px-4 py-2 text-gray-600">
+                    {customer.email}
+                  </td>
+
+                  <td className="px-4 py-2 text-gray-600">
+                    {customer.phone}
+                  </td>
+
+                  <td className="px-4 py-2 text-gray-600">
+                    {customer.city}, {customer.country}
+                  </td>
+
+                  <td className="px-4 py-2 text-gray-600">
+                    {formatDate(customer.created_at)}
+                  </td>
+
+                  <td className="px-4 py-2">
+                    <div className="flex justify-center gap-2">
+
+                      <button
+                        onClick={() => viewCustomer(customer.id)}
+                        title="View Details"
+                        className="px-2 py-1 text-xs font-medium text-white bg-sky-500 rounded-md hover:bg-sky-600"
+                      >
+                        <i className="fas fa-eye"></i>
+                      </button>
+
+                      <button
+                        onClick={() => emailCustomer(customer.email)}
+                        title="Email Customer"
+                        className="px-2 py-1 text-xs font-medium text-white bg-amber-500 rounded-md hover:bg-amber-600"
+                      >
+                        <i className="fas fa-envelope"></i>
+                      </button>
+
+                    </div>
+                  </td>
+
+                </tr>
+              ))
+            )}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+
+  </div>
+);
 }

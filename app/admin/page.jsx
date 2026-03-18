@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -130,136 +131,175 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="admin-content">
-      {/* Welcome Section */}
-      <div className="mb-5">
-        <h2 className="fw-bold mb-1">Store Overview</h2>
-        <p className="text-muted">Welcome back. Monitoring your chocolate empire's performance.</p>
-      </div>
+  <div className="p-6 space-y-6">
 
-      {/* Stats Cards */}
-      <div className="row g-4 mb-5">
-        <div className="col-md-4">
-          <div className="stat-card">
-            <div className="stat-icon bg-primary">
-              <i className="fas fa-cookie"></i>
-            </div>
-            <div className="stat-details">
-              <h3>{loading ? "..." : stats.totalOrders}</h3>
-              <p>Total Orders</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="stat-card">
-            <div className="stat-icon bg-success">
-              <i className="fas fa-gem"></i>
-            </div>
-            <div className="stat-details">
-              <h3>{loading ? "..." : formatCurrency(stats.totalRevenue)}</h3>
-              <p>Total Revenue</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="stat-card">
-            <div className="stat-icon bg-warning">
-              <i className="fas fa-box-open"></i>
-            </div>
-            <div className="stat-details">
-              <h3>{loading ? "..." : stats.totalProducts}</h3>
-              <p>Total Products</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="row g-4">
-        {/* Sales Chart */}
-        <div className="col-lg-8">
-          <div className="admin-card h-100">
-            <div className="card-header">
-              <h2>Revenue Analytics</h2>
-              <div className="badge bg-success">Live Analysis</div>
-            </div>
-            <div className="card-body" style={{ height: "350px" }}>
-              <canvas ref={chartRef}></canvas>
-            </div>
-          </div>
-        </div>
-
-        {/* Top Selling Products */}
-        <div className="col-lg-4">
-          <div className="admin-card h-100">
-            <div className="card-header">
-              <h2>Top Performers</h2>
-            </div>
-            <div className="card-body">
-              <div className="top-products-list">
-                {loading ? (
-                  Array(5).fill(0).map((_, i) => <div key={i} className="placeholder-glow mb-3"><div className="placeholder col-12 py-3 rounded"></div></div>)
-                ) : topProducts.length === 0 ? (
-                  <p className="text-muted text-center py-4">No product data available</p>
-                ) : (
-                  topProducts.map((product, index) => (
-                    <div className="product-item" key={product.id}>
-                      <div className="product-rank">{index + 1}</div>
-                      <div className="product-info">
-                        <h4>{product.name}</h4>
-                        <p>{product.sales} sales • <span style={{ color: "var(--admin-secondary)" }}>{formatCurrency(product.revenue)}</span></p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Orders */}
-        <div className="col-12 mt-4">
-          <div className="admin-card">
-            <div className="card-header">
-              <h2>Recent Orders</h2>
-              <button className="btn btn-primary btn-sm">Manage Orders</button>
-            </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Customer</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                       Array(5).fill(0).map((_, i) => <tr key={i}><td colSpan="5"><div className="placeholder-glow"><div className="placeholder col-12"></div></div></td></tr>)
-                    ) : recentOrders.length === 0 ? (
-                      <tr><td colSpan="5" className="text-center py-4">No orders found.</td></tr>
-                    ) : (
-                      recentOrders.map((order) => (
-                        <tr key={order.id}>
-                          <td className="fw-bold">#ORD-{order.id}</td>
-                          <td>{order.customer?.name || "Guest Customer"}</td>
-                          <td className="fw-bold" style={{ color: "var(--admin-primary)" }}>{formatCurrency(order.total)}</td>
-                          <td>{formatDate(order.created_at)}</td>
-                          <td>
-                            <span className="badge bg-success">Processed</span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    {/* Welcome */}
+    <div>
+      <h2 className="text-2xl font-bold">Store Overview</h2>
+      <p className="text-gray-500">
+        Welcome back. Monitoring your chocolate empire's performance.
+      </p>
     </div>
-  );
+
+    {/* Stats */}
+<div className="grid md:grid-cols-3 gap-4">
+  {/* Orders */}
+  <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-4 shadow-sm">
+    <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+      <i className="fas fa-shopping-bag text-blue-600 text-lg"></i>
+    </div>
+    <div>
+      <h3 className="text-xl font-semibold">
+        {loading ? "..." : stats.totalOrders}
+      </h3>
+      <p className="text-gray-500 text-sm">Total Orders</p>
+    </div>
+  </div>
+
+  {/* Revenue */}
+  <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-4 shadow-sm">
+    <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+      <i className="fas fa-rupee-sign text-emerald-600 text-lg"></i>
+    </div>
+    <div>
+      <h3 className="text-xl font-semibold">
+        {loading ? "..." : formatCurrency(stats.totalRevenue)}
+      </h3>
+      <p className="text-gray-500 text-sm">Total Revenue</p>
+    </div>
+  </div>
+
+  {/* Products */}
+  <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-4 shadow-sm">
+    <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
+      <i className="fas fa-box text-amber-600 text-lg"></i>
+    </div>
+    <div>
+      <h3 className="text-xl font-semibold">
+        {loading ? "..." : stats.totalProducts}
+      </h3>
+      <p className="text-gray-500 text-sm">Total Products</p>
+    </div>
+  </div>
+</div>
+
+    {/* Main Grid */}
+    <div className="grid lg:grid-cols-12 gap-6">
+
+      {/* Revenue Chart */}
+      <div className="lg:col-span-8 bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+          <h3 className="font-semibold">Revenue Analytics</h3>
+          <span className="text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
+            Live Analysis
+          </span>
+        </div>
+        <div className="p-4 h-[350px]">
+          <canvas ref={chartRef}></canvas>
+        </div>
+      </div>
+
+      {/* Top Products */}
+      <div className="lg:col-span-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="p-4 border-b border-gray-100">
+          <h3 className="font-semibold">Top Performers</h3>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {loading ? (
+            Array(5).fill(0).map((_, i) => (
+              <div key={i} className="h-12 bg-gray-100 rounded animate-pulse"></div>
+            ))
+          ) : topProducts.length === 0 ? (
+            <p className="text-gray-500 text-center py-6">
+              No product data available
+            </p>
+          ) : (
+            topProducts.map((product, index) => (
+              <div key={product.id} className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-gray-900 text-white text-xs flex items-center justify-center font-semibold">
+                  {index + 1}
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm">{product.name}</h4>
+                  <p className="text-xs text-gray-500">
+                    {product.sales} sales •{" "}
+                    <span className="font-medium text-amber-600">
+                      {formatCurrency(product.revenue)}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Recent Orders */}
+      <div className="lg:col-span-12 bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+          <h3 className="font-semibold">Recent Orders</h3>
+          <button className="text-sm font-medium bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700">
+            Manage Orders
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 text-gray-600">
+                <th className="text-left px-4 py-2 font-semibold">Order ID</th>
+                <th className="text-left px-4 py-2 font-semibold">Customer</th>
+                <th className="text-left px-4 py-2 font-semibold">Amount</th>
+                <th className="text-left px-4 py-2 font-semibold">Date</th>
+                <th className="text-left px-4 py-2 font-semibold">Status</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan="5" className="px-4 py-4">
+                      <div className="h-4 bg-gray-100 rounded animate-pulse"></div>
+                    </td>
+                  </tr>
+                ))
+              ) : recentOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-6 text-gray-500">
+                    No orders found.
+                  </td>
+                </tr>
+              ) : (
+                recentOrders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 font-semibold">
+                      #ORD-{order.id}
+                    </td>
+                    <td className="px-4 py-2">
+                      {order.customer?.name || "Guest Customer"}
+                    </td>
+                    <td className="px-4 py-2 font-semibold text-amber-700">
+                      {formatCurrency(order.total)}
+                    </td>
+                    <td className="px-4 py-2">
+                      {formatDate(order.created_at)}
+                    </td>
+                    <td className="px-4 py-2">
+                      <span className="text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
+                        Processed
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+);
 }

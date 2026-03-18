@@ -1,30 +1,43 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function AdminAddProduct() {
+  const router = useRouter();
+  const { token, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [variants, setVariants] = useState([
     { id: 0, name: "", gram: "", price: "", isPrimary: true, images: [""] },
   ]);
 
-  const addVariant = () => {
-    const newId =
-      variants.length > 0 ? Math.max(...variants.map((v) => v.id)) + 1 : 0;
-    setVariants([
-      ...variants,
-      {
-        id: newId,
-        name: "",
-        gram: "",
-        price: "",
-        isPrimary: false,
-        images: [""],
-      },
-    ]);
-  };
+  // Check if token exists on mount
+  useEffect(() => {
+    if (!token) {
+      router.push('/admin/login?redirect=/admin/products/add');
+    }
+  }, [token, router]);
+
+const addVariant = () => {
+  const newId = variants.length > 0 ? Math.max(...variants.map((v) => v.id)) + 1 : 0;
+  setVariants([
+    ...variants,
+    {
+      id: newId,
+      name: "", // Leave empty - we'll handle default in form submission
+      gram: "",
+      price: "",
+      isPrimary: false,
+      images: [""],
+    },
+  ]);
+};
 
   const removeVariant = (id) => {
-    // If we're deleting the primary, make the first remaining variant primary
     const filtered = variants.filter((v) => v.id !== id);
     if (filtered.length > 0 && variants.find((v) => v.id === id)?.isPrimary) {
       filtered[0].isPrimary = true;
@@ -41,7 +54,6 @@ export default function AdminAddProduct() {
           }
           return { ...v, [field]: value };
         }
-        // If we are setting a new primary, unset the others
         if (field === "isPrimary" && value === true) {
           return { ...v, isPrimary: false };
         }
@@ -76,7 +88,7 @@ export default function AdminAddProduct() {
       variants.map((v) => {
         if (v.id === variantId) {
           const newImages = [...v.images];
-          newImages[imageIndex] = file; // store File object
+          newImages[imageIndex] = file;
           return { ...v, images: newImages };
         }
         return v;
@@ -90,13 +102,156 @@ export default function AdminAddProduct() {
     return URL.createObjectURL(img);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(
-      "Frontend Mock: Product details, variants, and multiple images captured!\n\nThis would normally POST to the Django API.",
-    );
-    window.location.href = "/admin/products";
+  // Function to refresh the token using your existing refresh token
+  const refreshAccessToken = async () => {
+    const refreshToken = localStorage.getItem("melova_refresh");
+
+    if (!refreshToken) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/"}api/token/refresh/`,
+        { refresh: refreshToken }
+      );
+
+      const newAccessToken = response.data.access;
+
+      // Update token in localStorage and axios headers
+      localStorage.setItem("melova_token", newAccessToken);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
+
+      return newAccessToken;
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+      // If refresh fails, logout the user
+      logout();
+      router.push('/admin/login?redirect=/admin/products/add');
+      return null;
+    }
   };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
+  
+  try {
+    // DEBUG: Check what's in your variants state
+    console.log('Current variants state:', JSON.stringify(variants, null, 2));
+    
+    const formData = new FormData();
+    
+    // Get form input values
+    const title = document.getElementById('productName').value;
+    const introduction = document.getElementById('productIntro').value;
+    const description = document.getElementById('productDescription').value;
+    
+    console.log('Form values:', { title, introduction, description });
+    
+    // Basic Product Info
+    formData.append('title', title);
+    formData.append('introduction', introduction);
+    formData.append('details', description);
+    
+    // Loop through variants and add each field individually
+    variants.forEach((variant, index) => {
+      console.log(`Processing variant ${index}:`, variant);
+      
+      // Make sure we have values
+      const variantName = variant.name || `${variant.gram || '0'}g`;
+      const variantWeight = variant.gram || '0';
+      const variantPrice = variant.price || '0';
+      
+      // Append each field with the correct nested structure
+      formData.append(`variants[${index}][name]`, variantName);
+      formData.append(`variants[${index}][weight]`, variantWeight);
+      formData.append(`variants[${index}][price]`, variantPrice);
+      
+      // Add images for this variant
+      if (variant.images && variant.images.length > 0) {
+        variant.images.forEach((file, imgIndex) => {
+          if (file && typeof file !== 'string' && file instanceof File) {
+            formData.append(`variants[${index}][images]`, file);
+            console.log(`Added image ${imgIndex} for variant ${index}:`, file.name);
+          }
+        });
+      }
+    });
+    
+    // DEBUG: Check what's in FormData
+    for (let pair of formData.entries()) {
+      console.log('FormData entry:', pair[0], pair[1] instanceof File ? pair[1].name : pair[1]);
+    }
+    
+    // Get the current token
+    let currentToken = localStorage.getItem("melova_token");
+    console.log('Using token:', currentToken ? 'Token exists' : 'No token');
+    
+    // Make the request
+    let response = await fetch('http://127.0.0.1:8000/api/shop/products/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${currentToken}`,
+      },
+      body: formData,
+    });
+    
+    
+
+      // If token expired (401), try to refresh it
+      if (response.status === 401) {
+        console.log("Token expired, attempting to refresh...");
+
+        const newToken = await refreshAccessToken();
+
+        if (newToken) {
+          // Retry the request with the new token
+          response = await fetch('http://127.0.0.1:8000/api/shop/products/', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${newToken}`,
+            },
+            body: formData,
+          });
+        }
+      }
+
+      // Check if the request was successful
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Server error details:', errorData);
+        throw new Error(JSON.stringify(errorData));
+      }
+
+      const result = await response.json();
+      console.log('Product created successfully:', result);
+
+      // Success - redirect to products list
+      router.push('/admin/products');
+
+    } catch (err) {
+      console.error('Submission error:', err);
+
+      // Check if it's an authentication error
+      if (err.message.includes('401') || err.message.includes('Unauthorized') || err.message.includes('token')) {
+        setError('Session expired. Please login again.');
+        logout();
+        setTimeout(() => {
+          router.push('/admin/login?redirect=/admin/products/add');
+        }, 1500);
+      } else {
+        setError(err.message || 'Failed to create product');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  // If no token, show nothing while redirecting
+  if (!token) {
+    return <div className="text-center p-5">Redirecting to login...</div>;
+  }
 
   return (
     <div className="admin-content">
@@ -213,6 +368,16 @@ export default function AdminAddProduct() {
         </div>
       </div>
 
+      {error && (
+        <div className="alert alert-danger mb-4 d-flex align-items-center">
+          <i className="fas fa-exclamation-triangle me-3 fs-4"></i>
+          <div>
+            <h5 className="mb-1 fw-bold">Creation Failed</h5>
+            <p className="mb-0 small">{error}</p>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         <div className="row justify-content-center g-5">
           <div className="col-lg-12">
@@ -232,7 +397,6 @@ export default function AdminAddProduct() {
                         type="text"
                         className="form-control"
                         id="productName"
-                        name="name"
                         placeholder="e.g. Belgian Dark Chocolate Bar"
                         required
                       />
@@ -248,7 +412,6 @@ export default function AdminAddProduct() {
                         step="0.01"
                         className="form-control"
                         id="basePrice"
-                        name="price"
                         placeholder="0.00"
                         required
                       />
@@ -263,7 +426,6 @@ export default function AdminAddProduct() {
                   <textarea
                     className="form-control"
                     id="productIntro"
-                    name="intro"
                     rows="2"
                     placeholder="A enticing one-liner about your chocolate treat..."
                     required
@@ -276,7 +438,6 @@ export default function AdminAddProduct() {
                   <textarea
                     className="form-control"
                     id="productDescription"
-                    name="description"
                     rows="6"
                     placeholder="Describe the notes, origin, and craftsmanship involved..."
                     required
@@ -436,18 +597,31 @@ export default function AdminAddProduct() {
 
             {/* Form Actions */}
             <div className="d-flex justify-content-between align-items-center mt-5 mb-5 p-4 bg-white rounded-3 shadow-sm border">
-               <span className="text-muted small italic">Ready to add this masterpiece to your collection?</span>
-               <div className="d-flex gap-3">
-                  <Link
-                    href="/admin/products"
-                    className="btn btn-outline-secondary px-4"
-                  >
-                    Discard Changes
-                  </Link>
-                  <button type="submit" className="btn btn-primary px-5 py-3">
-                    <i className="fas fa-check-circle me-2"></i> Publish Product
-                  </button>
-               </div>
+              <span className="text-muted small italic">Ready to add this masterpiece to your collection?</span>
+              <div className="d-flex gap-3">
+                <Link
+                  href="/admin/products"
+                  className="btn btn-outline-secondary px-4"
+                >
+                  Discard Changes
+                </Link>
+                <button
+                  type="submit"
+                  className="btn btn-primary px-5 py-3"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Publishing...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-check-circle me-2"></i> Publish Product
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

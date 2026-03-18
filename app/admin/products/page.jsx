@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getProducts } from "@/lib/product-data";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminProducts() {
+  const { token } = useAuth();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,20 +80,38 @@ export default function AdminProducts() {
   };
 
   const editProduct = (id) => {
-    alert(
-      `Edit product #${id}\n\nThis would typically route to an edit form in Next.js.`,
-    );
+    window.location.href = `/admin/edit-product/${id}`;
   };
 
-  const deleteProduct = (id, name) => {
+  const deleteProduct = async (id, name) => {
     if (
       window.confirm(
         `Are you sure you want to delete "${name}"?\n\nThis action cannot be undone.`,
       )
     ) {
-      alert(
-        `Delete product #${id}\n\nThis would make an API call to delete the product.`,
-      );
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/api/shop/products/${id}/`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          setProducts((prev) => prev.filter((p) => p.id !== id));
+          console.log(`Product ${id} deleted successfully.`);
+        } else {
+          try {
+            const errorData = await res.json();
+            alert(`Delete failed: ${JSON.stringify(errorData)}`);
+          } catch (e) {
+            alert(`Delete failed with status: ${res.status}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("An error occurred while deleting the product.");
+      }
     }
   };
 
@@ -109,22 +129,25 @@ export default function AdminProducts() {
       </div>
 
       {/* Search and Filter */}
-      <div className="admin-card mb-4">
-        <div className="card-body">
-          <div className="row g-3">
+      <div className="admin-card mb-4 p-3">
+        <div className="card-body p-2">
+          <div className="row g-2 align-items-center">
+
+            {/* Search */}
             <div className="col-md-6">
-              <div className="search-box">
-                <i className="fas fa-search"></i>
+              <div className="position-relative">
+                <i className="fas fa-search search-icon absolute transform translate-y-2/3 left-3"></i>
                 <input
                   type="text"
-                  className="form-control"
-                  style={{ paddingLeft: "35px" }}
+                  className="form-control ps-5"
                   placeholder="Search products by name..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
+
+            {/* Sort */}
             <div className="col-md-3">
               <select
                 className="form-select"
@@ -132,139 +155,156 @@ export default function AdminProducts() {
                 onChange={(e) => setSortOption(e.target.value)}
               >
                 <option value="">Sort by...</option>
-                <option value="name-asc">Name (A-Z)</option>
-                <option value="name-desc">Name (Z-A)</option>
-                <option value="price-asc">Price (Low to High)</option>
-                <option value="price-desc">Price (High to Low)</option>
+                <option value="name-asc">Name (A–Z)</option>
+                <option value="name-desc">Name (Z–A)</option>
+                <option value="price-asc">Price (Low → High)</option>
+                <option value="price-desc">Price (High → Low)</option>
               </select>
             </div>
+
+            {/* Reset */}
             <div className="col-md-3">
               <button
                 className="btn btn-outline-secondary w-100"
                 onClick={resetFilters}
               >
-                <i className="fas fa-redo"></i> Reset Filters
+                <i className="fas fa-redo me-2"></i>
+                Reset
               </button>
             </div>
+
           </div>
         </div>
       </div>
-
       {/* Products Table */}
-      <div className="admin-card">
-        <div className="card-header">
-          <h2>All Products ({filteredProducts.length})</h2>
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-4 p-3">
+
+        {/* Header */}
+        <div className="flex items-center justify-between pb-2">
+          <h2 className="text-lg font-semibold">
+            All Products
+            <span className="text-gray-500 font-normal ml-2">
+              ({filteredProducts.length})
+            </span>
+          </h2>
         </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table products-table">
-              <thead>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+
+            {/* Head */}
+            <thead>
+              <tr className="bg-gray-50 text-gray-600">
+                <th className="text-left px-3 py-2 font-semibold">ID</th>
+                <th className="text-left px-3 py-2 font-semibold">Image</th>
+                <th className="text-left px-3 py-2 font-semibold">Product Name</th>
+                <th className="text-left px-3 py-2 font-semibold">Description</th>
+                <th className="text-left px-3 py-2 font-semibold">Price</th>
+                <th className="text-left px-3 py-2 font-semibold">Variants</th>
+                <th className="text-center px-3 py-2 font-semibold">Actions</th>
+              </tr>
+            </thead>
+
+            {/* Body */}
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
                 <tr>
-                  <th>ID</th>
-                  <th>Image</th>
-                  <th>Product Name</th>
-                  <th>Description</th>
-                  <th>Price</th>
-                  <th>Variants</th>
-                  <th>Actions</th>
+                  <td colSpan="7" className="text-center py-6 text-gray-500">
+                    Loading products...
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="7" className="text-center">
-                      Loading products...
+              ) : filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-6 text-gray-500">
+                    No products found.
+                  </td>
+                </tr>
+              ) : (
+                filteredProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50 transition">
+
+                    {/* ID */}
+                    <td className="px-3 py-2 font-medium">{product.id}</td>
+
+                    {/* Image */}
+                    <td className="px-3 py-2">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                            No Image
+                          </div>
+                        )}
+                      </div>
                     </td>
-                  </tr>
-                ) : filteredProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="text-center">
-                      <p className="text-muted py-4">No products found.</p>
+
+                    {/* Name */}
+                    <td className="px-3 py-2">
+                      <p className="font-semibold">{product.title}</p>
                     </td>
+
+                    {/* Description */}
+                    <td className="px-3 py-2 max-w-[240px]">
+                      <p className="text-gray-600">
+                        {product.introduction && product.introduction.length > 60
+                          ? `${product.introduction.substring(0, 60)}...`
+                          : product.introduction}
+                      </p>
+                    </td>
+
+                    {/* Price */}
+                    <td className="px-3 py-2 font-semibold">
+                      {formatCurrency(
+                        product.variants?.[0]?.price ?? product.price
+                      )}
+                    </td>
+
+                    {/* Variants */}
+                    <td className="px-3 py-2">
+                      {product.variants ? product.variants.length : 0}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-3 py-2">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => viewProduct(product.id)}
+                          title="View"
+                          className="px-2 py-1 text-xs font-medium text-white bg-sky-500 rounded-md hover:bg-sky-600"
+                        >
+                          View
+                        </button>
+
+                        <button
+                          onClick={() => editProduct(product.id)}
+                          title="Edit"
+                          className="px-2 py-1 text-xs font-medium text-white bg-amber-500 rounded-md hover:bg-amber-600"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => deleteProduct(product.id, product.title)}
+                          title="Delete"
+                          className="px-2 py-1 text-xs font-medium text-white bg-rose-500 rounded-md hover:bg-rose-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+
                   </tr>
-                ) : (
-                  filteredProducts.map((product) => (
-                    <tr key={product.id}>
-                      <td>{product.id}</td>
-                      <td>
-                        <div
-                          className="product-image-thumb"
-                          style={{
-                            width: "50px",
-                            height: "50px",
-                            overflow: "hidden",
-                            borderRadius: "5px",
-                          }}
-                        >
-                          {product.image ? (
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          ) : (
-                            <div className="no-image d-flex align-items-center justify-content-center bg-light w-100 h-100">
-                              <i className="fas fa-image text-muted"></i>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <strong>{product.title}</strong>
-                      </td>
-                      <td>
-                        <div
-                          className="product-intro"
-                          style={{ maxWidth: "250px" }}
-                        >
-                          {product.intro && product.intro.length > 60
-                            ? `${product.introduction.substring(0, 60)}...`
-                            : product.intro}
-                        </div>
-                      </td>
-                      <td>
-                        <span className="price-tag">
-                          {formatCurrency(product.price)}
-                        </span>
-                      </td>
-                      <td>{product.variants ? product.variants.length : 0}</td>
-                      <td>
-                        <div className="action-buttons text-nowrap">
-                          <button
-                            className="btn btn-sm btn-info me-1"
-                            onClick={() => viewProduct(product.id)}
-                            title="View"
-                          >
-                            <i className="fas fa-eye text-white"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-warning me-1"
-                            onClick={() => editProduct(product.id)}
-                            title="Edit"
-                          >
-                            <i className="fas fa-edit text-white"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() =>
-                              deleteProduct(product.id, product.name)
-                            }
-                            title="Delete"
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+
+          </table>
         </div>
       </div>
     </div>

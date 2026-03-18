@@ -12,7 +12,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isAnimatedPage = ["/", "/products", "/about", "/buy-now"].includes(pathname);
 
   const dropdownRef = useRef(null);
 
@@ -42,10 +42,11 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-white/5 ${scrolled || !isHome
-          ? "bg-[#562c1b] backdrop-blur-md shadow-lg py-3 border-b"
-          : "bg-[transparent] backdrop-blur-sm py-5"
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-white/5 ${
+          !isAnimatedPage || scrolled
+            ? "bg-[#562c1b] backdrop-blur-md shadow-lg py-3 border-b"
+            : "bg-transparent backdrop-blur-sm py-5"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
@@ -55,8 +56,9 @@ export default function Header() {
                 <img
                   src="/img/melova_logo.png"
                   alt="Melova Logo"
-                  className={`transition-all duration-300 w-auto drop-shadow-lg ${scrolled ? "h-12" : "h-14"
-                    }`}
+                  className={`transition-all duration-300 w-auto drop-shadow-lg ${
+                    !isAnimatedPage || scrolled ? "h-12" : "h-14"
+                  }`}
                 />
               </Link>
             </div>
@@ -118,15 +120,15 @@ export default function Header() {
                         }`}
                     >
                       <div className="py-2">
-                        {/* {user?.is_staff || user?.is_superuser && ( */}
-                        <Link
-                          href="/admin"
-                          className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 hover:text-amber-600 transition-colors"
-                        >
-                          <i className="fas fa-tachometer-alt w-5 text-center mr-2 text-stone-400"></i>
-                          Dashboard
-                        </Link>
-                        {/* )} */}
+                        {(role === "admin" || role === "superadmin") && (
+                          <Link
+                            href="/admin"
+                            className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 hover:text-amber-600 transition-colors"
+                          >
+                            <i className="fas fa-tachometer-alt w-5 text-center mr-2 text-stone-400"></i>
+                            Dashboard
+                          </Link>
+                        )}
                         <Link
                           href="/profile"
                           className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 hover:text-amber-600 transition-colors"

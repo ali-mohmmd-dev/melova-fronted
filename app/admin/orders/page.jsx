@@ -71,124 +71,156 @@ export default function AdminOrders() {
   const viewOrder = (id) => alert(`Viewing details for Order #${id}`);
   const printInvoice = (id) => alert(`Printing invoice for Order #${id}`);
 
-  return (
-    <div className="admin-content">
-      {/* Search and Filter */}
-      <div className="admin-card mb-4">
-        <div className="card-body">
-          <div className="row g-3">
-            <div className="col-md-6">
-              <div className="search-box">
-                <i className="fas fa-search"></i>
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{ paddingLeft: "35px" }}
-                  placeholder="Search orders by customer name or ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="col-md-3">
-              <select
-                className="form-select"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="">All Statuses</option>
-                <option value="Completed">Completed</option>
-                <option value="Pending">Pending</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div className="col-md-3">
-              <button
-                className="btn btn-outline-secondary w-100"
-                onClick={resetFilters}
-              >
-                <i className="fas fa-redo"></i> Reset Filters
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+ return (
+  <div className="p-6 space-y-6">
 
-      {/* Orders Table */}
-      <div className="admin-card">
-        <div className="card-header">
-          <h2>All Orders ({filteredOrders.length})</h2>
+    {/* Search & Filters */}
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <div className="grid md:grid-cols-12 gap-3 items-center">
+
+        {/* Search */}
+        <div className="md:col-span-6 relative">
+          <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+          <input
+            type="text"
+            placeholder="Search orders by customer name or ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table orders-table">
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Email</th>
-                  <th>Total Amount</th>
-                  <th>Order Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="7" className="text-center">
-                      Loading orders...
-                    </td>
-                  </tr>
-                ) : filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="text-center">
-                      <p className="text-muted py-4">No orders found.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredOrders.map((order) => (
-                    <tr key={order.id}>
-                      <td>#{order.id}</td>
-                      <td>
-                        <strong>{order.customer_name || "N/A"}</strong>
-                      </td>
-                      <td>{order.email || "N/A"}</td>
-                      <td>
-                        <span className="price-tag">
-                          {formatCurrency(order.total)}
-                        </span>
-                      </td>
-                      <td>{formatDate(order.created_at)}</td>
-                      <td>
-                        <span className="badge bg-success">Completed</span>
-                      </td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            className="btn btn-sm btn-info me-1"
-                            onClick={() => viewOrder(order.id)}
-                            title="View Details"
-                          >
-                            <i className="fas fa-eye text-white"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-primary"
-                            onClick={() => printInvoice(order.id)}
-                            title="Print Invoice"
-                          >
-                            <i className="fas fa-print"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+
+        {/* Status Filter */}
+        <div className="md:col-span-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All Statuses</option>
+            <option value="Completed">Completed</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
         </div>
+
+        {/* Reset */}
+        <div className="md:col-span-3">
+          <button
+            onClick={resetFilters}
+            className="w-full border border-gray-300 rounded-lg py-2 text-sm font-medium hover:bg-gray-50"
+          >
+            <i className="fas fa-rotate-right mr-2"></i>
+            Reset Filters
+          </button>
+        </div>
+
       </div>
     </div>
-  );
+
+    {/* Orders Table */}
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <h2 className="font-semibold">
+          All Orders
+          <span className="text-gray-500 font-normal ml-2">
+            ({filteredOrders.length})
+          </span>
+        </h2>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          
+          <thead>
+            <tr className="bg-gray-50 text-gray-600">
+              <th className="text-left px-4 py-2 font-semibold">Order ID</th>
+              <th className="text-left px-4 py-2 font-semibold">Customer</th>
+              <th className="text-left px-4 py-2 font-semibold">Email</th>
+              <th className="text-left px-4 py-2 font-semibold">Total Amount</th>
+              <th className="text-left px-4 py-2 font-semibold">Order Date</th>
+              <th className="text-left px-4 py-2 font-semibold">Status</th>
+              <th className="text-center px-4 py-2 font-semibold">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-100">
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="text-center py-8 text-gray-500">
+                  Loading orders...
+                </td>
+              </tr>
+            ) : filteredOrders.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center py-8 text-gray-500">
+                  No orders found.
+                </td>
+              </tr>
+            ) : (
+              filteredOrders.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-50 transition">
+                  
+                  <td className="px-4 py-2 font-semibold">
+                    #{order.id}
+                  </td>
+
+                  <td className="px-4 py-2">
+                    <span className="font-medium">
+                      {order.customer_name || "N/A"}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-2 text-gray-600">
+                    {order.email || "N/A"}
+                  </td>
+
+                  <td className="px-4 py-2 font-semibold text-amber-700">
+                    {formatCurrency(order.total)}
+                  </td>
+
+                  <td className="px-4 py-2 text-gray-600">
+                    {formatDate(order.created_at)}
+                  </td>
+
+                  <td className="px-4 py-2">
+                    <span className="text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
+                      Completed
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-2">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => viewOrder(order.id)}
+                        title="View Details"
+                        className="px-2 py-1 text-xs font-medium text-white bg-sky-500 rounded-md hover:bg-sky-600"
+                      >
+                        <i className="fas fa-eye"></i>
+                      </button>
+
+                      <button
+                        onClick={() => printInvoice(order.id)}
+                        title="Print Invoice"
+                        className="px-2 py-1 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                      >
+                        <i className="fas fa-print"></i>
+                      </button>
+                    </div>
+                  </td>
+
+                </tr>
+              ))
+            )}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+
+  </div>
+);
 }
