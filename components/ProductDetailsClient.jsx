@@ -1,9 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 
 export default function ProductDetailsClient({ product }) {
   const router = useRouter();
+  const { token } = useAuth();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
   const variants = product.variants || [];
@@ -19,19 +22,38 @@ export default function ProductDetailsClient({ product }) {
   // Swiper state
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const handleOrderNow = (e) => {
-    e.preventDefault();
+  const handleAddToCart = async (e, silent = false) => {
+    if (e) e.preventDefault();
+    if (!token) {
+      alert("Please login to add items to cart.");
+      router.push("/login?redirect=" + window.location.pathname);
+      return false;
+    }
 
-    const orderData = {
-      productId: product.id,
-      productName: product.title || product.name,
-      variant: selectedVariant,
-      price: currentPrice,
-      image: currentImages[0],
-    };
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
+      await axios.post(
+        `${API_URL}api/shop/cart/add_item/`,
+        { variant_id: selectedVariant.id, quantity: 1 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Trigger header refresh
+      window.dispatchEvent(new Event("cartUpdated"));
+      if (!silent) alert("Added to cart!");
+      return true;
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      if (!silent) alert("Failed to add to cart.");
+      return false;
+    }
+  };
 
-    localStorage.setItem("pendingOrder", JSON.stringify(orderData));
-    router.push("/checkout");
+  const handleOrderNow = async (e) => {
+    if (e) e.preventDefault();
+    const added = await handleAddToCart(null, true);
+    if (added) {
+      router.push("/cart");
+    }
   };
 
   return (
@@ -163,15 +185,19 @@ export default function ProductDetailsClient({ product }) {
             </div>
           )}
 
-          <div className="product-actions mt-5">
-            <a
-              href="#"
+          <div className="product-actions mt-5 d-flex flex-wrap gap-3">
+            <button
               className="btn-default"
-              id="orderNowBtn"
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </button>
+            <button
+              className="btn-default bg-dark text-white border-0"
               onClick={handleOrderNow}
             >
-              Order Now
-            </a>
+              Buy Now
+            </button>
           </div>
         </div>
       </div>

@@ -1,7 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminOrders() {
+  const { token } = useAuth();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,9 +12,14 @@ export default function AdminOrders() {
 
   useEffect(() => {
     async function fetchOrders() {
-      const API_BASE_URL = "http://127.0.0.1:8000/api/shop/orders/";
+      if (!token) return;
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}api/shop/orders/` : "http://127.0.0.1:8000/api/shop/orders/";
       try {
-        const response = await fetch(API_BASE_URL);
+        const response = await fetch(API_BASE_URL, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         if (!response.ok) throw new Error("API Error");
         const data = await response.json();
         setOrders(data);
@@ -24,18 +31,19 @@ export default function AdminOrders() {
       }
     }
     fetchOrders();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const filtered = orders.filter((order) => {
-      const customerName = (order.customer_name || "").toLowerCase();
+      // Admin might want to search by full name, email, or order ID
+      const customerName = (order.full_name || order.user_email || "").toLowerCase();
       const orderIdStr = String(order.id);
 
       const matchesSearch =
         customerName.includes(searchTerm.toLowerCase()) ||
         orderIdStr.includes(searchTerm.toLowerCase());
 
-      const status = "Completed"; // Modify this once backend has real status
+      const status = order.status || "Completed";
       const matchesStatus = statusFilter === "" || status === statusFilter;
 
       return matchesSearch && matchesStatus;
@@ -170,12 +178,12 @@ export default function AdminOrders() {
 
                   <td className="px-4 py-2">
                     <span className="font-medium">
-                      {order.customer_name || "N/A"}
+                      {order.full_name || "N/A"}
                     </span>
                   </td>
 
                   <td className="px-4 py-2 text-gray-600">
-                    {order.email || "N/A"}
+                    {order.user_email || "N/A"}
                   </td>
 
                   <td className="px-4 py-2 font-semibold text-amber-700">
@@ -187,8 +195,12 @@ export default function AdminOrders() {
                   </td>
 
                   <td className="px-4 py-2">
-                    <span className="text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
-                      Completed
+                    <span className={`text-xs font-medium px-2 py-1 rounded ${
+                      order.status === "Paid" ? "bg-emerald-100 text-emerald-700" :
+                      order.status === "Pending" ? "bg-amber-100 text-amber-700" :
+                      "bg-gray-100 text-gray-700"
+                    }`}>
+                      {order.status || "Pending"}
                     </span>
                   </td>
 

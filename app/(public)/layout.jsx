@@ -5,13 +5,13 @@ import Footer from "@/components/Footer";
 
 export default function PublicLayout({ children }) {
   const pathname = usePathname();
-  const isCheckout = pathname === "/checkout";
+  const hideHeaderFooter = pathname === "/checkout" || pathname === "/cart";
 
   return (
     <>
-      {!isCheckout && <Header />}
+      {!hideHeaderFooter && <Header />}
       {children}
-      {!isCheckout && <Footer />}
+      {!hideHeaderFooter && <Footer />}
     </>
   );
 }

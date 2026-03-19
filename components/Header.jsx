@@ -3,13 +3,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import axios from "axios";
 
 export default function Header() {
-  const { user, role, logout } = useAuth();
+  const { user, role, logout, token } = useAuth();
   const router = useRouter();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
   const pathname = usePathname();
   const isAnimatedPage = ["/", "/products", "/about", "/buy-now"].includes(pathname);
@@ -39,14 +43,36 @@ export default function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      if (!token) {
+        setCartCount(0);
+        return;
+      }
+      try {
+        const res = await axios.get(`${API_URL}api/shop/cart/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const totalItems = res.data.items.reduce((acc, item) => acc + item.quantity, 0);
+        setCartCount(totalItems);
+      } catch (err) {
+        console.error("Error fetching cart count:", err);
+      }
+    };
+
+    fetchCartCount();
+    // Also listen for a custom event 'cartUpdated' to refresh count
+    window.addEventListener('cartUpdated', fetchCartCount);
+    return () => window.removeEventListener('cartUpdated', fetchCartCount);
+  }, [token]);
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-white/5 ${
-          !isAnimatedPage || scrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-white/5 ${!isAnimatedPage || scrolled
             ? "bg-[#562c1b] backdrop-blur-md shadow-lg py-3 border-b"
             : "bg-transparent backdrop-blur-sm py-5"
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
@@ -56,9 +82,8 @@ export default function Header() {
                 <img
                   src="/img/melova_logo.png"
                   alt="Melova Logo"
-                  className={`transition-all duration-300 w-auto drop-shadow-lg ${
-                    !isAnimatedPage || scrolled ? "h-12" : "h-14"
-                  }`}
+                  className={`transition-all duration-300 w-auto drop-shadow-lg ${!isAnimatedPage || scrolled ? "h-12" : "h-14"
+                    }`}
                 />
               </Link>
             </div>
@@ -136,13 +161,15 @@ export default function Header() {
                           <i className="fas fa-user w-5 text-center mr-2 text-stone-400"></i>
                           My Profile
                         </Link>
-                        <Link
-                          href="/orders"
-                          className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 hover:text-amber-600 transition-colors"
-                        >
-                          <i className="fas fa-shopping-bag w-5 text-center mr-2 text-stone-400"></i>
-                          My Orders
-                        </Link>
+                        {role !== "admin" && role !== "superadmin" && (
+                          <Link
+                            href="/orders"
+                            className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 hover:text-amber-600 transition-colors"
+                          >
+                            <i className="fas fa-shopping-bag w-5 text-center mr-2 text-stone-400"></i>
+                            My Orders
+                          </Link>
+                        )}
                         <div className="h-px bg-stone-100 my-1"></div>
                         <a
                           href="#logout"
@@ -167,15 +194,28 @@ export default function Header() {
               </div>
 
               {/* CTA Button */}
+              {/* Cart Button */}
               <Link
-                href="/contact"
-                className="relative overflow-hidden group bg-gradient-to-r from-amber-600 to-amber-500 text-white px-6 py-2.5 rounded-full font-medium text-sm tracking-wide shadow-lg hover:shadow-amber-500/30 transition-shadow duration-300"
+                href="/cart"
+                className={`relative flex items-center justify-center w-11 h-11 rounded-full shadow-md transition-all duration-300 border
+    ${!isAnimatedPage || scrolled
+                    ? "bg-white/10 border-white/20 hover:bg-white/20"
+                    : "bg-white border-stone-200 hover:bg-stone-50"
+                  }`}
               >
-                <span className="relative z-10 flex items-center gap-2">
-                  Reach Us
-                  <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-                </span>
-                <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-amber-500 to-amber-400 scale-x-0 group-hover:scale-x-100 transform origin-left transition-transform duration-500 ease-out z-0"></div>
+                {/* Bag Icon */}
+                <i
+                  className={`fas fa-shopping-bag text-base transition-colors
+      ${!isAnimatedPage || scrolled ? "text-amber-400" : "text-amber-700"}
+    `}
+                />
+
+                {/* Count Badge */}
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-amber-800 text-white text-[10px] min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full font-bold leading-none">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
             </div>
 
@@ -312,14 +352,16 @@ export default function Header() {
                       <i className="fas fa-user w-6 text-center text-stone-500 mr-3"></i>
                       My Profile
                     </Link>
-                    <Link
-                      href="/orders"
-                      className="flex items-center text-stone-300 hover:text-amber-400 transition-colors"
-                      onClick={() => setSideMenuOpen(false)}
-                    >
-                      <i className="fas fa-shopping-bag w-6 text-center text-stone-500 mr-3"></i>
-                      My Orders
-                    </Link>
+                    {role !== "admin" && role !== "superadmin" && (
+                      <Link
+                        href="/orders"
+                        className="flex items-center text-stone-300 hover:text-amber-400 transition-colors"
+                        onClick={() => setSideMenuOpen(false)}
+                      >
+                        <i className="fas fa-shopping-bag w-6 text-center text-stone-500 mr-3"></i>
+                        My Orders
+                      </Link>
+                    )}
                     <a
                       href="#logout"
                       onClick={(e) => {
@@ -349,12 +391,17 @@ export default function Header() {
 
         <div className="p-6 border-t border-white/10 bg-black/20">
           <Link
-            href="/contact"
-            className="flex items-center justify-center w-full bg-gradient-to-r from-amber-600 to-amber-500 text-white py-3.5 rounded-xl font-medium tracking-wide shadow-lg shadow-amber-900/40 hover:brightness-110 transition-all"
+            href="/cart"
+            className="flex items-center justify-center w-full bg-gradient-to-r from-amber-600 to-amber-500 text-white py-3.5 rounded-xl font-medium tracking-wide shadow-lg shadow-amber-900/40 hover:brightness-110 transition-all gap-3"
             onClick={() => setSideMenuOpen(false)}
           >
-            Reach Us
-            <i className="fas fa-arrow-right ml-2 text-sm"></i>
+            <i className="fas fa-shopping-cart text-lg"></i>
+            Cart
+            {cartCount > 0 && (
+              <span className="bg-white text-amber-800 text-xs w-6 h-6 flex items-center justify-center rounded-full font-bold">
+                {cartCount}
+              </span>
+            )}
           </Link>
         </div>
       </div>

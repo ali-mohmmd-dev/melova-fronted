@@ -10,7 +10,7 @@ export default function CheckoutPage() {
   const { user, token } = useAuth();
 
   const [step, setStep] = useState(1);
-  const [orderData, setOrderData] = useState(null);
+  const [cart, setCart] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -37,10 +37,24 @@ export default function CheckoutPage() {
     return () => document.body.removeChild(script);
   }, []);
 
-  // Load order + autofill user
+  // Load cart + autofill user
   useEffect(() => {
-    const savedOrder = localStorage.getItem("pendingOrder");
-    if (savedOrder) setOrderData(JSON.parse(savedOrder));
+    const fetchCart = async () => {
+      if (!token) return;
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
+        const res = await axios.get(`${API_URL}api/shop/cart/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCart(res.data);
+      } catch (err) {
+        console.error("Error fetching cart for checkout:", err);
+      }
+    };
+
+    if (token) {
+      fetchCart();
+    }
 
     if (user) {
       setFormData((p) => ({
@@ -50,7 +64,7 @@ export default function CheckoutPage() {
         email: user.email || "",
       }));
     }
-  }, [user]);
+  }, [user, token]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -70,13 +84,12 @@ export default function CheckoutPage() {
 
   const handleSubmitOrder = async () => {
     if (!user || !token) return alert("Login required.");
-    if (!orderData?.variant?.id) return alert("Order info missing.");
+    if (!cart || cart.items.length === 0) return alert("Cart is empty.");
 
     setIsProcessing(true);
 
     try {
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
       const payload = {
         full_name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -86,24 +99,23 @@ export default function CheckoutPage() {
         city: formData.city,
         state: formData.state,
         pincode: formData.zipCode,
-        items: [{ variant: orderData.variant.id, quantity: 1 }],
       };
 
       const res = await axios.post(
-        `${API_URL}api/shop/orders/`,
+        `${API_URL}api/shop/cart/checkout/`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const razorpayOrderId = res.data.razorpay_order_id;
-      const amountInPaise = Math.round(orderData.price * 100);
+      const amountInPaise = Math.round(cart.total_price * 100);
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: amountInPaise,
         currency: "INR",
         name: "Melova",
-        description: `Order for ${orderData.productName}`,
+        description: "Melova Chocolate Order",
         order_id: razorpayOrderId,
         handler: async (response) => {
           const verifyRes = await axios.post(
@@ -117,7 +129,7 @@ export default function CheckoutPage() {
           );
 
           if (verifyRes.data.status === "Payment Successful") {
-            localStorage.removeItem("pendingOrder");
+            window.dispatchEvent(new Event("cartUpdated"));
             setStep(3);
           } else {
             alert("Payment verification failed.");
@@ -133,13 +145,14 @@ export default function CheckoutPage() {
 
       new window.Razorpay(options).open();
     } catch (err) {
+      console.error("Order error:", err);
       alert("Order failed. Try again.");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  if (!orderData && step !== 3) {
+  if (!cart && step !== 3) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Link href="/products" className="text-amber-800 underline">
@@ -291,7 +304,7 @@ export default function CheckoutPage() {
                   >
                     {isProcessing
                       ? "Processing..."
-                      : `Pay ₹${orderData.price}`}
+                      : `Pay ₹${cart.total_price}`}
                   </button>
                 </div>
               </>
@@ -325,26 +338,33 @@ export default function CheckoutPage() {
                 Order summary
               </h3>
 
-              <div className="flex gap-4 mb-6">
-                <img
-                  src={orderData.image}
-                  alt=""
-                  className="w-16 h-16 rounded-lg object-cover border border-gray-100"
-                />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {orderData.productName}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {orderData.variant.name} ({orderData.variant.gram}g)
-                  </p>
-                </div>
+              <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
+                {cart.items.map((item) => (
+                  <div key={item.id} className="flex gap-4 mb-4 items-center">
+                    <img
+                      src={item.variant_details.images[0]?.image || "/img/placeholder_product.png"}
+                      alt={item.variant_details.name}
+                      className="w-12 h-12 rounded-lg object-cover border border-gray-100"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {item.variant_details.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {item.quantity} x ₹{item.variant_details.price}
+                      </p>
+                    </div>
+                    <div className="text-sm font-medium text-gray-900">
+                      ₹{item.subtotal}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Subtotal</span>
-                  <span>₹{orderData.price}</span>
+                  <span>₹{cart.total_price}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Shipping</span>
@@ -352,7 +372,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between font-semibold text-gray-900 pt-3 border-t">
                   <span>Total</span>
-                  <span>₹{orderData.price}</span>
+                  <span>₹{cart.total_price}</span>
                 </div>
               </div>
             </div>
