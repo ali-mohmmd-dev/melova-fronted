@@ -12,6 +12,7 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1);
   const [cart, setCart] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -42,7 +43,6 @@ export default function CheckoutPage() {
     const fetchCart = async () => {
       if (!token) return;
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
         const res = await axios.get(`${API_URL}api/shop/cart/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -57,10 +57,14 @@ export default function CheckoutPage() {
     }
 
     if (user) {
+      const fullName = (user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`).trim();
+      const [firstName, ...rest] = fullName ? fullName.split(/\s+/) : [];
+      const lastName = rest.join(" ");
+
       setFormData((p) => ({
         ...p,
-        firstName: user.first_name || "",
-        lastName: user.last_name || "",
+        firstName: firstName || "",
+        lastName: lastName || "",
         email: user.email || "",
       }));
     }
@@ -89,7 +93,6 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
       const payload = {
         full_name: `${formData.firstName} ${formData.lastName}`.trim(),

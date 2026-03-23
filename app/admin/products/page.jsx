@@ -90,7 +90,8 @@ export default function AdminProducts() {
       )
     ) {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/shop/products/${id}/`, {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
+        const res = await fetch(`${API_URL}api/shop/products/${id}/`, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,

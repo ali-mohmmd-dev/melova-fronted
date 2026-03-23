@@ -11,7 +11,7 @@ export default function AdminEditProduct() {
   const id = params.id;
   const router = useRouter();
   const { token, logout } = useAuth();
-  
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -156,15 +156,15 @@ export default function AdminEditProduct() {
   };
 
   const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem("melova_refresh");
+    const refreshToken = sessionStorage.getItem("melova_refresh");
     if (!refreshToken) return null;
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/"}api/token/refresh/`,
+        `${API_URL}api/token/refresh/`,
         { refresh: refreshToken }
       );
       const newAccessToken = response.data.access;
-      localStorage.setItem("melova_token", newAccessToken);
+      sessionStorage.setItem("melova_token", newAccessToken);
       return newAccessToken;
     } catch (error) {
       console.error("Token refresh failed:", error);
@@ -209,9 +209,9 @@ export default function AdminEditProduct() {
         }
       });
       
-      let currentToken = localStorage.getItem("melova_token");
+      let currentToken = sessionStorage.getItem("melova_token");
       
-      let response = await fetch(`http://127.0.0.1:8000/api/shop/products/${id}/`, {
+      let response = await fetch(`${API_URL}api/shop/products/${id}/`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${currentToken}` },
         body: formData,
@@ -220,7 +220,7 @@ export default function AdminEditProduct() {
       if (response.status === 401) {
         const newToken = await refreshAccessToken();
         if (newToken) {
-          response = await fetch(`http://127.0.0.1:8000/api/shop/products/${id}/`, {
+          response = await fetch(`${API_URL}api/shop/products/${id}/`, {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${newToken}` },
             body: formData,

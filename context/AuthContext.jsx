@@ -13,9 +13,9 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("melova_token");
-    const savedRole = localStorage.getItem("melova_role");
-    const savedUser = localStorage.getItem("melova_user");
+    const savedToken = sessionStorage.getItem("melova_token");
+    const savedRole = sessionStorage.getItem("melova_role");
+    const savedUser = sessionStorage.getItem("melova_user");
 
     if (savedToken && savedUser) {
       setToken(savedToken);
@@ -40,10 +40,10 @@ export function AuthProvider({ children }) {
     setRole(userRole);
     setUser(user);
 
-    localStorage.setItem("melova_token", accessToken);
-    if (refresh) localStorage.setItem("melova_refresh", refresh);
-    localStorage.setItem("melova_role", userRole);
-    localStorage.setItem("melova_user", JSON.stringify(user));
+    sessionStorage.setItem("melova_token", accessToken);
+    if (refresh) sessionStorage.setItem("melova_refresh", refresh);
+    sessionStorage.setItem("melova_role", userRole);
+    sessionStorage.setItem("melova_user", JSON.stringify(user));
 
     axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
@@ -65,28 +65,33 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = async (googleIdToken) => {
-    const res = await axios.post(`${API_URL}api/auth/google-login/`, {
-      id_token: googleIdToken,
-    });
-
-    return handleAuthSuccess(res.data);
+    try {
+      // The backend expects exactly { "id_token": "..." }
+      const res = await axios.post(`${API_URL}api/auth/google/`, {
+        id_token: googleIdToken,
+      });
+      return handleAuthSuccess(res.data);
+    } catch (err) {
+      console.error("Google Login Error:", err.response?.data || err.message);
+      throw err;
+    }
   };
 
   const updateProfile = async (payload) => {
-    const accessToken = localStorage.getItem("melova_token");
-    const res = await axios.put(`${API_URL}api/auth/profile/update/`, payload, {
+    const accessToken = sessionStorage.getItem("melova_token");
+    const res = await axios.patch(`${API_URL}api/auth/me/`, payload, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     const updatedUser = res.data.user;
     setUser(updatedUser);
-    localStorage.setItem("melova_user", JSON.stringify(updatedUser));
+    sessionStorage.setItem("melova_user", JSON.stringify(updatedUser));
     return updatedUser;
   };
 
   const logout = async () => {
-    const refreshToken = localStorage.getItem("melova_refresh");
-    const accessToken = localStorage.getItem("melova_token");
+    const refreshToken = sessionStorage.getItem("melova_refresh");
+    const accessToken = sessionStorage.getItem("melova_token");
 
     if (refreshToken && accessToken) {
       try {
@@ -103,10 +108,10 @@ export function AuthProvider({ children }) {
     setToken(null);
     setRole(null);
     setUser(null);
-    localStorage.removeItem("melova_token");
-    localStorage.removeItem("melova_refresh");
-    localStorage.removeItem("melova_role");
-    localStorage.removeItem("melova_user");
+    sessionStorage.removeItem("melova_token");
+    sessionStorage.removeItem("melova_refresh");
+    sessionStorage.removeItem("melova_role");
+    sessionStorage.removeItem("melova_user");
     delete axios.defaults.headers.common["Authorization"];
   };
 

@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
+import ProductCard from "./ProductCard";
 
 export default function ProductsScroll({ products }) {
   const scrollerRef = useRef(null);
@@ -64,25 +65,7 @@ export default function ProductsScroll({ products }) {
       >
         {products.map((product) => (
           <div className="col-lg-3" key={product.id}>
-            <Link href={`/products/${product.id}`}>
-              <div className="product-item wow fadeInUp" data-wow-delay="0.6s">
-                <div className="product-image">
-                  <img src={product.image} alt={product.name} />
-                </div>
-                <div className="product-item-body">
-                  <div className="product-rating">
-                    <i className="fa-solid fa-star"></i>
-                    <i className="fa-solid fa-star"></i>
-                    <i className="fa-solid fa-star"></i>
-                    <i className="fa-solid fa-star"></i>
-                    <i className="fa-solid fa-star"></i>
-                  </div>
-                  <div className="product-item-content">
-                    <h2>{product.name}</h2>
-                  </div>
-                </div>
-              </div>
-            </Link>
+            <ProductCard product={product} />
           </div>
         ))}
       </div>

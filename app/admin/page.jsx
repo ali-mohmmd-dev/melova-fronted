@@ -1,8 +1,12 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
+  const { token } = useAuth();
+  const router = useRouter();
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -10,16 +14,24 @@ export default function AdminDashboard() {
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const [chartData, setChartData] = useState(new Array(12).fill(0));
   const [loading, setLoading] = useState(true);
   const chartRef = useRef(null);
 
   useEffect(() => {
     async function fetchData() {
-      const API_BASE_URL = "http://127.0.0.1:8000/api/shop/";
+      if (!token) return;
+      
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
+      
       try {
         const [ordersRes, productsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}orders/`),
-          fetch(`${API_BASE_URL}products/`),
+          fetch(`${API_BASE_URL}api/shop/orders/`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          fetch(`${API_BASE_URL}api/shop/products/`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
         ]);
 
         if (!ordersRes.ok || !productsRes.ok) throw new Error("API Error");
@@ -27,6 +39,7 @@ export default function AdminDashboard() {
         const orders = await ordersRes.json();
         const products = await productsRes.json();
 
+        // 1. Calculate Stats
         const totalRevenue = orders.reduce(
           (sum, order) => sum + (parseFloat(order.total) || 0),
           0,
@@ -37,17 +50,43 @@ export default function AdminDashboard() {
           totalProducts: products.length,
         });
 
+        // 2. Recent Orders
         setRecentOrders(orders.slice(0, 8));
 
-        const productsWithSales = products
-          .map((product) => ({
-            ...product,
-            sales: Math.floor(Math.random() * 90) + 10,
-            revenue: Math.floor(Math.random() * 9000) + 1000,
-          }))
+        // 3. Top Performers (Real Data)
+        const productStats = {};
+        orders.forEach(order => {
+          if (order.items) {
+            order.items.forEach(item => {
+              const pid = item.product;
+              if (!productStats[pid]) {
+                productStats[pid] = { sales: 0, revenue: 0, name: item.product_name };
+              }
+              productStats[pid].sales += item.quantity;
+              productStats[pid].revenue += (parseFloat(item.price) * item.quantity);
+            });
+          }
+        });
+
+        const sortedTop = Object.entries(productStats)
+          .map(([id, data]) => ({ id, ...data }))
           .sort((a, b) => b.sales - a.sales)
           .slice(0, 5);
-        setTopProducts(productsWithSales);
+        
+        setTopProducts(sortedTop);
+
+        // 4. Monthly Revenue for Chart
+        const monthlyRevenue = new Array(12).fill(0);
+        const currentYear = new Date().getFullYear();
+        
+        orders.forEach(order => {
+          const date = new Date(order.created_at);
+          if (date.getFullYear() === currentYear) {
+            monthlyRevenue[date.getMonth()] += parseFloat(order.total) || 0;
+          }
+        });
+        setChartData(monthlyRevenue);
+
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -56,7 +95,7 @@ export default function AdminDashboard() {
     }
 
     fetchData();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (window.Chart && chartRef.current && !window.salesChartInstance) {
@@ -72,7 +111,7 @@ export default function AdminDashboard() {
           datasets: [
             {
               label: "Revenue (₹)",
-              data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 35000, 32000, 40000, 38000, 45000],
+              data: chartData,
               borderColor: "#9e7c29",
               backgroundColor: gradient,
               borderWidth: 4,
@@ -118,7 +157,7 @@ export default function AdminDashboard() {
         window.salesChartInstance = null;
       }
     };
-  }, [loading]);
+  }, [loading, chartData]);
 
   const formatCurrency = (amount) => {
     return "₹" + parseFloat(amount).toLocaleString("en-IN");
@@ -239,7 +278,10 @@ export default function AdminDashboard() {
       <div className="lg:col-span-12 bg-white rounded-xl border border-gray-200 shadow-sm">
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <h3 className="font-semibold">Recent Orders</h3>
-          <button className="text-sm font-medium bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700">
+          <button 
+            onClick={() => router.push("/admin/orders")}
+            className="text-sm font-medium bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700"
+          >
             Manage Orders
           </button>
         </div>
@@ -273,22 +315,30 @@ export default function AdminDashboard() {
                 </tr>
               ) : (
                 recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 font-semibold">
+                  <tr 
+                    key={order.id} 
+                    className="hover:bg-gray-50 cursor-pointer transition"
+                    onClick={() => router.push(`/admin/orders/${order.id}`)}
+                  >
+                    <td className="px-4 py-3 font-semibold text-stone-700">
                       #ORD-{order.id}
                     </td>
-                    <td className="px-4 py-2">
-                      {order.customer?.name || "Guest Customer"}
+                    <td className="px-4 py-3 text-stone-600">
+                      {order.full_name || order.customer?.name || "Guest Customer"}
                     </td>
-                    <td className="px-4 py-2 font-semibold text-amber-700">
+                    <td className="px-4 py-3 font-semibold text-amber-700">
                       {formatCurrency(order.total)}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-3 text-stone-500">
                       {formatDate(order.created_at)}
                     </td>
-                    <td className="px-4 py-2">
-                      <span className="text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
-                        Processed
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-medium px-2 py-1 rounded ${
+                        order.status === "Paid" ? "bg-emerald-100 text-emerald-700" :
+                        order.status === "Pending" ? "bg-amber-100 text-amber-700" :
+                        "bg-gray-100 text-gray-700"
+                      }`}>
+                        {order.status || "Processed"}
                       </span>
                     </td>
                   </tr>

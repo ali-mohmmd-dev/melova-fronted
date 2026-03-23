@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getProducts } from "@/lib/product-data";
+import ProductCard from "@/components/ProductCard";
 
 export const metadata = {
   title: "Our Chocolates Products | MyMelova Chocolate Factory",
@@ -47,28 +48,7 @@ export default async function Products() {
               <div className="our-product-box row">
                 {products.map((product) => (
                   <div className="col-lg-3" key={product.id}>
-                    <Link href={`/products/${product.id}`}>
-                      <div
-                        className="product-item wow fadeInUp"
-                        data-wow-delay="0.6s"
-                      >
-                        <div className="product-image">
-                          <img src={product.image} alt={product.name} />
-                        </div>
-                        <div className="product-item-body">
-                          <div className="product-rating">
-                            <i className="fa-solid fa-star"></i>
-                            <i className="fa-solid fa-star"></i>
-                            <i className="fa-solid fa-star"></i>
-                            <i className="fa-solid fa-star"></i>
-                            <i className="fa-solid fa-star"></i>
-                          </div>
-                          <div className="product-item-content">
-                            <h2>{product.title}</h2>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
+                    <ProductCard product={product} />
                   </div>
                 ))}
               </div>

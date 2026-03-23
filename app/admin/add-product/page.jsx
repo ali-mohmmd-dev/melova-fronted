@@ -10,6 +10,7 @@ export default function AdminAddProduct() {
   const { token, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
   const [variants, setVariants] = useState([
     { id: 0, name: "", gram: "", price: "", isPrimary: true, images: [""] },
@@ -104,7 +105,7 @@ const addVariant = () => {
 
   // Function to refresh the token using your existing refresh token
   const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem("melova_refresh");
+    const refreshToken = sessionStorage.getItem("melova_refresh");
 
     if (!refreshToken) {
       return null;
@@ -112,14 +113,14 @@ const addVariant = () => {
 
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/"}api/token/refresh/`,
+        `${API_URL}api/token/refresh/`,
         { refresh: refreshToken }
       );
 
       const newAccessToken = response.data.access;
 
       // Update token in localStorage and axios headers
-      localStorage.setItem("melova_token", newAccessToken);
+      sessionStorage.setItem("melova_token", newAccessToken);
       axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
 
       return newAccessToken;
@@ -186,11 +187,11 @@ const handleSubmit = async (e) => {
     }
     
     // Get the current token
-    let currentToken = localStorage.getItem("melova_token");
+    let currentToken = sessionStorage.getItem("melova_token");
     console.log('Using token:', currentToken ? 'Token exists' : 'No token');
     
     // Make the request
-    let response = await fetch('http://127.0.0.1:8000/api/shop/products/', {
+    let response = await fetch(`${API_URL}api/shop/products/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${currentToken}`,
@@ -208,7 +209,7 @@ const handleSubmit = async (e) => {
 
         if (newToken) {
           // Retry the request with the new token
-          response = await fetch('http://127.0.0.1:8000/api/shop/products/', {
+          response = await fetch(`${API_URL}api/shop/products/`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${newToken}`,

@@ -13,7 +13,7 @@ export default function Login() {
 
   const { user, login, loginWithGoogle, loading: authLoading } = useAuth();
   const router = useRouter();
-
+  
   React.useEffect(() => {
     if (!authLoading && user) {
       router.push("/");

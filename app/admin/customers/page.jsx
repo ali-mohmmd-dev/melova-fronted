@@ -1,17 +1,26 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function AdminCustomers() {
+  const { token } = useAuth();
+  const router = useRouter();
   const [customers, setCustomers] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
   useEffect(() => {
     async function fetchCustomers() {
-      const API_BASE_URL = "http://127.0.0.1:8000/api/shop/customers/";
+      if (!token) return;
       try {
-        const response = await fetch(API_BASE_URL);
+        const response = await fetch(`${API_URL}api/auth/customers/`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         if (!response.ok) throw new Error("API Error");
         const data = await response.json();
         setCustomers(data);
@@ -23,7 +32,7 @@ export default function AdminCustomers() {
       }
     }
     fetchCustomers();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const filtered = customers.filter((customer) => {
@@ -53,7 +62,9 @@ export default function AdminCustomers() {
     });
   };
 
-  const viewCustomer = (id) => alert(`Viewing details for Customer #${id}`);
+  const viewCustomer = (id) => {
+    router.push(`/admin/customers/${id}`);
+  };
   const emailCustomer = (email) => (window.location.href = `mailto:${email}`);
 
  return (
@@ -133,29 +144,34 @@ export default function AdminCustomers() {
               </tr>
             ) : (
               filteredCustomers.map((customer) => (
-                <tr key={customer.id} className="hover:bg-gray-50 transition">
-
-                  <td className="px-4 py-2 font-semibold">
+                <tr 
+                  key={customer.id} 
+                  className="hover:bg-amber-50/30 transition cursor-pointer group"
+                  onClick={() => viewCustomer(customer.id)}
+                >
+                  <td className="px-5 py-4 font-bold text-stone-700">
                     #{customer.id}
                   </td>
 
-                  <td className="px-4 py-2 font-medium">
+                  <td className="px-5 py-4 font-bold text-stone-800 group-hover:text-amber-800 transition">
                     {customer.name}
                   </td>
 
-                  <td className="px-4 py-2 text-gray-600">
+                  <td className="px-5 py-4 text-stone-600">
                     {customer.email}
                   </td>
 
-                  <td className="px-4 py-2 text-gray-600">
-                    {customer.phone}
+                  <td className="px-5 py-4 text-stone-600">
+                    {customer.phone || "N/A"}
                   </td>
 
-                  <td className="px-4 py-2 text-gray-600">
-                    {customer.city}, {customer.country}
+                  <td className="px-5 py-4 text-stone-600">
+                    {customer.city || customer.country
+                      ? `${customer.city || ""}${customer.country ? ", " + customer.country : ""}`
+                      : "N/A"}
                   </td>
 
-                  <td className="px-4 py-2 text-gray-600">
+                  <td className="px-5 py-4 text-stone-500">
                     {formatDate(customer.created_at)}
                   </td>
 

@@ -1,21 +1,23 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function AdminOrders() {
+  const router = useRouter();
   const { token } = useAuth();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
   const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     async function fetchOrders() {
       if (!token) return;
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}api/shop/orders/` : "http://127.0.0.1:8000/api/shop/orders/";
       try {
-        const response = await fetch(API_BASE_URL, {
+        const response = await fetch(`${API_URL}api/shop/orders/`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -43,7 +45,7 @@ export default function AdminOrders() {
         customerName.includes(searchTerm.toLowerCase()) ||
         orderIdStr.includes(searchTerm.toLowerCase());
 
-      const status = order.status || "Completed";
+      const status = order.status || "";
       const matchesStatus = statusFilter === "" || status === statusFilter;
 
       return matchesSearch && matchesStatus;
@@ -76,7 +78,9 @@ export default function AdminOrders() {
     });
   };
 
-  const viewOrder = (id) => alert(`Viewing details for Order #${id}`);
+  const viewOrder = (id) => {
+    router.push(`/admin/orders/${id}`);
+  };
   const printInvoice = (id) => alert(`Printing invoice for Order #${id}`);
 
  return (
@@ -106,8 +110,10 @@ export default function AdminOrders() {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Statuses</option>
-            <option value="Completed">Completed</option>
             <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
             <option value="Cancelled">Cancelled</option>
           </select>
         </div>

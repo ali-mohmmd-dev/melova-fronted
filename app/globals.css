@@ -1,3 +1,12 @@
+
+body {
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  line-height: normal; /* Typically ~1.2 */
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

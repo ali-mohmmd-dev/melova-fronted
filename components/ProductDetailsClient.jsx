@@ -86,6 +86,9 @@ export default function ProductDetailsClient({ product }) {
                       width: "100%",
                       height: "auto",
                       borderRadius: "15px",
+                      aspectRatio: "1/1",
+                      objectFit: "cover",
+                      
                     }}
                   />
                 </div>

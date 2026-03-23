@@ -72,7 +72,7 @@ body {
 	width: calc(100%);
 	font-size: 16px;
 	font-weight: 300;
-	line-height: 0em;
+	line-height: 1.5;
 	color: var(--text-color);
 	background: var(--bg-color);
 }
@@ -7230,7 +7230,7 @@ header.main-header .header-sticky.active {
 }
 
 .product-details-page {
-	padding-top: 110px;
+	padding-top: 20vh;
 	padding-bottom: 80px;
 }
 
@@ -7264,7 +7264,7 @@ header.main-header .header-sticky.active {
 
 @media only screen and (max-width : 768px) {
 	.product-details-page {
-		padding-top: 100px
+		padding-top: 120px
 	}
 
 	.responsive-menu ul {
@@ -7287,7 +7287,7 @@ header.main-header .header-sticky.active {
 
 @media only screen and (max-width : 600px) {
 	.product-details-page {
-		padding-top: 70px
+		padding-top: 100px
 	}
 
 	.hero.hero-bg-image .hero-box{
@@ -7314,4 +7314,19 @@ header.main-header .header-sticky.active {
 
 .about-us .section-title h3 {
 	 color  : #fff ;
+}
+
+/* Product Card Styling */
+.product-item-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #ffffff;
+}
+
+.product-item-content .product-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e0cb64; /* Brand gold color */
+  margin-bottom: 0;
 }
