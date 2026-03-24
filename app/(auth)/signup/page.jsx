@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function Signup() {
@@ -77,7 +78,7 @@ const handleSubmit = async (e) => {
   }
 };
 
-  const handleGoogleCredential = async (credential) => {
+  const handleGoogleCredential = React.useCallback(async (credential) => {
     setError("");
     setGoogleLoading(true);
     try {
@@ -88,7 +89,7 @@ const handleSubmit = async (e) => {
     } finally {
       setGoogleLoading(false);
     }
-  };
+  }, [loginWithGoogle, router]);
 
   React.useEffect(() => {
     if (!window.google || !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) return;
@@ -102,7 +103,7 @@ const handleSubmit = async (e) => {
     } catch (e) {
       console.error("Failed to initialize Google Identity Services", e);
     }
-  }, []);
+  }, [handleGoogleCredential]);
 
   const strengthBar = {
     weak: "w-1/3 bg-red-400",
@@ -119,10 +120,13 @@ const handleSubmit = async (e) => {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-8 py-10">
           {/* Header */}
           <div className="text-center mb-8">
-            <img
+            <Image
               src="/img/melova_logo.png"
               alt="MyMelova"
+              width={64}
+              height={64}
               className="w-16 mx-auto mb-4"
+              priority
             />
             <h1 className="text-2xl font-semibold text-gray-900">
               Create account
@@ -306,9 +310,11 @@ const handleSubmit = async (e) => {
               </>
             ) : (
               <>
-                <img
+                <Image
                   src="https://developers.google.com/identity/images/g-logo.png"
                   alt="Google"
+                  width={16}
+                  height={16}
                   className="h-4 w-4"
                 />
                 Continue with Google

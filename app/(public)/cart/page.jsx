@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 
@@ -22,7 +23,7 @@ export default function CartPage() {
   const card =
     "bg-white rounded-2xl shadow-sm border border-gray-100";
 
-  const fetchCart = async () => {
+  const fetchCart = React.useCallback(async () => {
     if (!token) return;
     try {
       const res = await axios.get(`${API_URL}api/shop/cart/`, {
@@ -34,12 +35,12 @@ export default function CartPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, API_URL]);
 
   useEffect(() => {
     if (token) fetchCart();
     else setLoading(false);
-  }, [token]);
+  }, [token, fetchCart]);
 
   const updateQuantity = async (variantId, newQuantity) => {
     if (newQuantity < 1) return;
@@ -98,7 +99,7 @@ export default function CartPage() {
         </div>
         <h2 className="text-xl font-semibold mb-2 text-stone-800">Your bag is empty</h2>
         <p className="text-stone-500 mb-6 max-w-sm text-sm">
-          Looks like you haven't added anything yet.
+          Looks like you haven&apos;t added anything yet.
         </p>
         <Link href="/products" className={btnPrimary}>
           Start Shopping
@@ -128,14 +129,15 @@ export default function CartPage() {
                 key={item.id}
                 className={`${card} p-3 sm:p-4 flex gap-3 items-center`}
               >
-                <div className="w-20 h-20 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0">
-                  <img
+                <div className="w-20 h-20 rounded-lg overflow-hidden bg-stone-100 flex-shrink-0 relative">
+                  <Image
                     src={
                       item.variant_details.images[0]?.image ||
                       "/img/placeholder_product.png"
                     }
                     alt={item.variant_details.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 </div>
 

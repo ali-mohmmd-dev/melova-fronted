@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 
@@ -68,7 +69,7 @@ export default function CheckoutPage() {
         email: user.email || "",
       }));
     }
-  }, [user, token]);
+  }, [user, token, API_URL]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -344,11 +345,14 @@ export default function CheckoutPage() {
               <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
                 {cart.items.map((item) => (
                   <div key={item.id} className="flex gap-4 mb-4 items-center">
-                    <img
-                      src={item.variant_details.images[0]?.image || "/img/placeholder_product.png"}
-                      alt={item.variant_details.name}
-                      className="w-12 h-12 rounded-lg object-cover border border-gray-100"
-                    />
+                    <div className="w-12 h-12 relative flex-shrink-0">
+                      <Image
+                        src={item.variant_details.images[0]?.image || "/img/placeholder_product.png"}
+                        alt={item.variant_details.name}
+                        fill
+                        className="rounded-lg object-cover border border-gray-100"
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {item.variant_details.name}

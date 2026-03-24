@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function AdminOrderDetails() {
@@ -31,7 +32,7 @@ export default function AdminOrderDetails() {
       }
     }
     fetchOrderDetails();
-  }, [token, id]);
+  }, [token, id, API_URL]);
 
   const updateStatus = async (newStatus) => {
     setUpdating(true);
@@ -100,7 +101,7 @@ export default function AdminOrderDetails() {
           Order Not Found
         </h2>
         <p className="text-stone-500 mb-8">
-          The order you're looking for doesn't exist or you don't have
+          The order you&apos;re looking for doesn&apos;t exist or you don&apos;t have
           permission to view it.
         </p>
         <Link
@@ -175,14 +176,15 @@ export default function AdminOrderDetails() {
                   key={index}
                   className="p-7 flex items-center gap-6 group hover:bg-stone-50 transition"
                 >
-                  <div className="w-20 h-20 bg-stone-100 rounded-xl overflow-hidden flex-shrink-0 border border-stone-200">
-                    <img
+                  <div className="w-20 h-20 bg-stone-100 rounded-xl overflow-hidden flex-shrink-0 border border-stone-200 relative">
+                    <Image
                       src={
                         item.product_image ||
                         "https://placehold.co/100x100?text=No+Image"
                       }
                       alt={item.product_name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                      fill
+                      className="object-cover group-hover:scale-110 transition duration-500"
                     />
                   </div>
 

@@ -1,39 +1,41 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 
 const AuthContext = createContext();
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
-  const [token, setToken] = useState(null);
+  const [user, setUser] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedUser = sessionStorage.getItem("melova_user");
+      return savedUser ? JSON.parse(savedUser) : null;
+    }
+    return null;
+  });
+  const [role, setRole] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("melova_role");
+    }
+    return null;
+  });
+  const [token, setToken] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("melova_token");
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = sessionStorage.getItem("melova_token");
-    const savedRole = sessionStorage.getItem("melova_role");
-    const savedUser = sessionStorage.getItem("melova_user");
-
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setRole(savedRole);
-      setUser(JSON.parse(savedUser));
-      // Set the authorization header for initial state
-      axios.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
-    }
+    // Auth state is already loaded from sessionStorage via lazy init above.
+    // Mark loading as complete so guards can render.
     setLoading(false);
   }, []);
 
   const handleAuthSuccess = (authPayload) => {
-    // Backend might return 'access' (SimpleJWT) or 'token'
     const accessToken = authPayload.access || authPayload.token;
     const { refresh, user } = authPayload;
 
-    // Determine role for backward compatibility if needed, 
-    // but preference is to use user.is_staff / user.is_superuser
     const userRole = user?.is_superuser ? "superadmin" : user?.is_staff ? "admin" : "user";
 
     setToken(accessToken);
@@ -45,29 +47,22 @@ export function AuthProvider({ children }) {
     sessionStorage.setItem("melova_role", userRole);
     sessionStorage.setItem("melova_user", JSON.stringify(user));
 
-    axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-
     return userRole;
   };
 
   const login = async (email, password) => {
-    const res = await axios.post(`${API_URL}api/auth/login/`, {
-      email,
-      password,
-    });
-
+    const res = await api.post("api/auth/login/", { email, password });
     return handleAuthSuccess(res.data);
   };
 
   const register = async (payload) => {
-    const res = await axios.post(`${API_URL}api/auth/register/`, payload);
+    const res = await api.post("api/auth/register/", payload);
     return handleAuthSuccess(res.data);
   };
 
   const loginWithGoogle = async (googleIdToken) => {
     try {
-      // The backend expects exactly { "id_token": "..." }
-      const res = await axios.post(`${API_URL}api/auth/google/`, {
+      const res = await api.post("api/auth/google/", {
         id_token: googleIdToken,
       });
       return handleAuthSuccess(res.data);
@@ -78,12 +73,11 @@ export function AuthProvider({ children }) {
   };
 
   const updateProfile = async (payload) => {
-    const accessToken = sessionStorage.getItem("melova_token");
-    const res = await axios.patch(`${API_URL}api/auth/me/`, payload, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const res = await api.patch("api/auth/me/", payload);
 
-    const updatedUser = res.data.user;
+    // UserProfileView returns the user object directly on PATCH,
+    // wrapped in { user: ... } only when using retrieve.
+    const updatedUser = res.data.user || res.data;
     setUser(updatedUser);
     sessionStorage.setItem("melova_user", JSON.stringify(updatedUser));
     return updatedUser;
@@ -91,15 +85,10 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     const refreshToken = sessionStorage.getItem("melova_refresh");
-    const accessToken = sessionStorage.getItem("melova_token");
 
-    if (refreshToken && accessToken) {
+    if (refreshToken) {
       try {
-        await axios.post(
-          `${API_URL}api/auth/logout/`,
-          { refresh: refreshToken },
-          { headers: { Authorization: `Bearer ${accessToken}` } },
-        );
+        await api.post("api/auth/logout/", { refresh: refreshToken });
       } catch (err) {
         console.error("Logout error:", err);
       }
@@ -112,7 +101,6 @@ export function AuthProvider({ children }) {
     sessionStorage.removeItem("melova_refresh");
     sessionStorage.removeItem("melova_role");
     sessionStorage.removeItem("melova_user");
-    delete axios.defaults.headers.common["Authorization"];
   };
 
   return (

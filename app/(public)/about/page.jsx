@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
@@ -61,9 +62,9 @@ export default function About() {
             <div className="col-lg-6">
               {/* Approach Image Start */}
               <div className="approach-image">
-                <div className="approach-img">
-                  <figure className="image-anime">
-                    <img src="/img/about.png" alt="" />
+                <div className="approach-img relative h-[450px]">
+                  <figure className="image-anime h-full">
+                    <Image src="/img/about.png" alt="About Melova" fill className="object-cover" />
                   </figure>
                 </div>
 
@@ -95,7 +96,7 @@ export default function About() {
                 <div className="mission-vision-item wow fadeInUp">
                   <div className="mission-vision-header">
                     <div className="icon-box">
-                      <img src="/images/icon-mission.svg" alt="" />
+                      <Image src="/images/icon-mission.svg" alt="Mission Icon" width={50} height={50} />
                     </div>
                     <div className="mission-vision-title">
                       <h3>our mission</h3>
@@ -117,7 +118,7 @@ export default function About() {
                 >
                   <div className="mission-vision-header">
                     <div className="icon-box">
-                      <img src="/images/icon-vision.svg" alt="" />
+                      <Image src="/images/icon-vision.svg" alt="Vision Icon" width={50} height={50} />
                     </div>
                     <div className="mission-vision-title">
                       <h3>our vision</h3>
@@ -166,7 +167,7 @@ export default function About() {
                     data-wow-delay="0.4s"
                   >
                     <div className="icon-box">
-                      <img src="/images/icon-why-choose-1.svg" alt="" />
+                      <Image src="/images/icon-why-choose-1.svg" alt="Quality Icon" width={60} height={60} />
                     </div>
                     <div className="why-choose-item-content">
                       <h3>Premium Quality, Every Time</h3>
@@ -183,7 +184,7 @@ export default function About() {
                     data-wow-delay="0.6s"
                   >
                     <div className="icon-box">
-                      <img src="/images/icon-why-choose-2.svg" alt="" />
+                      <Image src="/images/icon-why-choose-2.svg" alt="Consistency Icon" width={60} height={60} />
                     </div>
                     <div className="why-choose-item-content">
                       <h3>Consistency & Precision</h3>
@@ -200,7 +201,7 @@ export default function About() {
                     data-wow-delay="0.8s"
                   >
                     <div className="icon-box">
-                      <img src="/images/icon-why-choose-3.svg" alt="" />
+                      <Image src="/images/icon-why-choose-3.svg" alt="Occasion Icon" width={60} height={60} />
                     </div>
                     <div className="why-choose-item-content">
                       <h3>Perfect for Every Occasion</h3>
@@ -219,17 +220,17 @@ export default function About() {
               {/* Why Choose Images Start */}
               <div className="why-choose-images">
                 <div className="why-choose-image-box-1">
-                  <div className="why-choose-image wow fadeInUp">
-                    <figure className="image-anime">
-                      <img src="/img/about-2.png" alt="" />
+                  <div className="why-choose-image relative h-[300px] wow fadeInUp">
+                    <figure className="image-anime h-full">
+                      <Image src="/img/about-2.png" alt="Chocolate Crafting" fill className="object-cover" />
                     </figure>
 
                     <div className="why-choose-cta-box">
                       <div className="icon-box">
-                        <img src="/images/icon-headset.svg" alt="" />
+                        <Image src="/images/icon-headset.svg" alt="Support Icon" width={40} height={40} />
                       </div>
                       <div className="why-choose-cta-content">
-                        <p>Have questions? Let’s talk chocolate!</p>
+                        <p>Have questions? Let&apos;s talk chocolate!</p>
                       </div>
                     </div>
                   </div>
@@ -252,9 +253,9 @@ export default function About() {
                 </div>
 
                 <div className="why-choose-image-box-2">
-                  <div className="why-choose-image">
-                    <figure className="image-anime">
-                      <img src="/img/about-3.png" alt="" />
+                  <div className="why-choose-image relative h-[350px]">
+                    <figure className="image-anime h-full">
+                      <Image src="/img/about-3.png" alt="Chocolate Selection" fill className="object-cover" />
                     </figure>
                   </div>
                 </div>

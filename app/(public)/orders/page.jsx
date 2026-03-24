@@ -11,7 +11,7 @@ export default function MyOrdersPage() {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
-  const fetchOrders = async () => {
+  const fetchOrders = React.useCallback(async () => {
     if (!token) return;
     try {
       const res = await axios.get(`${API_URL}api/shop/orders/`, {
@@ -27,12 +27,12 @@ export default function MyOrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, API_URL]);
 
   useEffect(() => {
     if (token) fetchOrders();
     else setLoading(false);
-  }, [token]);
+  }, [token, fetchOrders]);
 
   if (loading) {
     return (
@@ -64,7 +64,7 @@ export default function MyOrdersPage() {
         </div>
         <h2 className="text-2xl font-semibold mb-3 text-stone-800 tracking-tight">No orders yet</h2>
         <p className="text-stone-500 mb-8 max-w-sm text-sm">
-          You haven't placed any orders. Discover our exquisite selection of premium chocolates and place your first order.
+          You haven&apos;t placed any orders. Discover our exquisite selection of premium chocolates and place your first order.
         </p>
         <Link 
           href="/products" 

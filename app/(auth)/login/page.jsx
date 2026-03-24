@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function Login() {
@@ -41,7 +42,7 @@ export default function Login() {
     }
   };
 
-  const handleGoogleCredential = async (credential) => {
+  const handleGoogleCredential = React.useCallback(async (credential) => {
     setError("");
     setGoogleLoading(true);
     try {
@@ -58,7 +59,7 @@ export default function Login() {
     } finally {
       setGoogleLoading(false);
     }
-  };
+  }, [loginWithGoogle, router]);
 
   React.useEffect(() => {
     if (!window.google || !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
@@ -88,7 +89,7 @@ export default function Login() {
     } catch (e) {
       console.error("Failed to initialize Google Identity Services", e);
     }
-  }, []);
+  }, [handleGoogleCredential]);
 
   return (
     <div className="login-page-wrapper">
@@ -289,10 +290,13 @@ export default function Login() {
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
-            <img
+            <Image
               src="/img/melova_logo.png"
               alt="MyMelova Logo"
+              width={120}
+              height={50}
               className="login-logo"
+              priority
             />
             <h1>Welcome Back</h1>
             <p>Login to access your account</p>
@@ -396,9 +400,11 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  <img
+                  <Image
                     src="https://developers.google.com/identity/images/g-logo.png"
                     alt="Google"
+                    width={18}
+                    height={18}
                     style={{ width: 18, height: 18 }}
                   />
                   Continue with Google
@@ -409,7 +415,7 @@ export default function Login() {
           </div>
 
           <div className="signup-link">
-            Don't have an account? <Link href="/signup">Sign Up</Link>
+            Don&apos;t have an account? <Link href="/signup">Sign Up</Link>
           </div>
 
           <div className="back-home">

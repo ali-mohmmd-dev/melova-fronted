@@ -32,7 +32,7 @@ export default function AdminCustomers() {
       }
     }
     fetchCustomers();
-  }, [token]);
+  }, [token, API_URL]);
 
   useEffect(() => {
     const filtered = customers.filter((customer) => {

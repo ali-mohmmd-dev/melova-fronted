@@ -4,6 +4,7 @@ import Link from "next/link";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 import { getProduct } from "@/lib/product-data";
 
 export default function AdminEditProduct() {
@@ -408,7 +409,14 @@ export default function AdminEditProduct() {
                     {variant.images.map((img, i) => (
                       <div className="col-lg-6" key={i}>
                         <div className="variant-image-input-group">
-                          <img src={getImagePreview(img) || "https://placehold.co/100x100?text=No+Image"} className="variant-image-preview" alt="" />
+                          <Image
+                            src={getImagePreview(img) || "https://placehold.co/100x100?text=No+Image"}
+                            className="variant-image-preview"
+                            alt="Product Preview"
+                            width={50}
+                            height={50}
+                            unoptimized
+                          />
                           <input type="file" accept="image/*" className="form-control form-control-sm" onChange={(e) => {
                             const file = e.target.files[0];
                             if (file) updateImage(variant.id, i, file);

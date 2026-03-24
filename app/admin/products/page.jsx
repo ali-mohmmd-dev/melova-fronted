@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getProducts } from "@/lib/product-data";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AdminProducts() {
@@ -230,15 +231,16 @@ export default function AdminProducts() {
 
                     {/* Image */}
                     <td className="px-3 py-2">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 relative">
                         {product.image ? (
-                          <img
+                          <Image
                             src={product.image}
                             alt={product.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center p-1">
                             No Image
                           </div>
                         )}

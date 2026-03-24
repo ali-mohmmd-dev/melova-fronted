@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
@@ -51,8 +52,8 @@ export default function BuyNow() {
             <div className="col-lg-12 col-md-12">
               <div className="product-item wow fadeInUp">
                 <div>
-                  <figure className="image-anime">
-                    <img src="/img/hawocart.png" alt="Hawocart" />
+                  <figure className="image-anime relative h-64">
+                    <Image src="/img/hawocart.png" alt="Hawocart" fill className="object-contain" />
                   </figure>
                 </div>
                 <div className="product-item-content">

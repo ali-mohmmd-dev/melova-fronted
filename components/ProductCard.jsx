@@ -1,12 +1,18 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function ProductCard({ product, delay = "0.6s" }) {
   return (
     <Link href={`/products/${product.id}`}>
       <div className="product-item wow fadeInUp" data-wow-delay={delay}>
-        <div className="product-image">
-          <img src={product.image} alt={product.name} />
+        <div className="product-image relative h-64">
+          <Image
+            src={product.image}
+            alt={product.title || product.name || "Product Image"}
+            fill
+            className="object-cover"
+          />
         </div>
         <div className="product-item-body">
           <div className="product-rating">

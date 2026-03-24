@@ -33,7 +33,7 @@ export default function AdminOrders() {
       }
     }
     fetchOrders();
-  }, [token]);
+  }, [token, API_URL]);
 
   useEffect(() => {
     const filtered = orders.filter((order) => {

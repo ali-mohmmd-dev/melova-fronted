@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { getProducts } from "@/lib/product-data";
 import ProductsScroll from "@/components/ProductsScroll";
@@ -138,11 +139,12 @@ export default async function Home() {
               {/* About Us Images Start */}
               <div className="about-us-images">
                 {/* About Image Start */}
-                <div className="about-image">
-                  <img
+                <div className="about-image relative h-[500px]">
+                  <Image
                     src="/img/melova-11.png"
                     alt="Finest Chocolates"
-                    className="move-img"
+                    fill
+                    className="move-img object-contain"
                   />
                 </div>
                 {/* About Image End */}
@@ -177,8 +179,8 @@ export default async function Home() {
               {/* Offers Item List Start */}
               <div className="offers-item-list offer-list-1">
                 <div className="offer-item wow fadeInUp">
-                  <div className="offer-image">
-                    <img src="/img/products/item-4.png" alt="" />
+                  <div className="offer-image relative h-48 w-48 mx-auto">
+                    <Image src="/img/products/item-4.png" alt="Angel Chocolate Bars" fill className="object-contain" />
                   </div>
                   <div className="offer-item-content">
                     <h2>ANGEL CHOCOLATE BARS</h2>
@@ -190,8 +192,8 @@ export default async function Home() {
                 </div>
 
                 <div className="offer-item wow fadeInUp" data-wow-delay="0.2s">
-                  <div className="offer-image">
-                    <img src="/img/products/item-5.png" alt="" />
+                  <div className="offer-image relative h-48 w-48 mx-auto">
+                    <Image src="/img/products/item-5.png" alt="Pistachio Kunafa" fill className="object-contain" />
                   </div>
                   <div className="offer-item-content">
                     <h2>
@@ -221,8 +223,8 @@ export default async function Home() {
                   className="best-offer-image wow fadeInUp"
                   data-wow-delay="0.2s"
                 >
-                  <figure>
-                    <img src="/img/offer.png" alt="" />
+                  <figure className="relative h-80 w-full">
+                    <Image src="/img/offer.png" alt="Best Offers" fill className="object-contain" />
                   </figure>
                 </div>
               </div>
@@ -232,8 +234,8 @@ export default async function Home() {
               {/* Offers Item List Start */}
               <div className="offers-item-list offer-list-2">
                 <div className="offer-item wow fadeInUp">
-                  <div className="offer-image">
-                    <img src="/img/products/item-7.png" alt="" />
+                  <div className="offer-image relative h-48 w-48 mx-auto">
+                    <Image src="/img/products/item-7.png" alt="Melova Dates Chocolate" fill className="object-contain" />
                   </div>
                   <div className="offer-item-content">
                     <h2>MELOVA DATES CHOCOLATE</h2>
@@ -244,8 +246,8 @@ export default async function Home() {
                 </div>
 
                 <div className="offer-item wow fadeInUp" data-wow-delay="0.2s">
-                  <div className="offer-image">
-                    <img src="/img/products/item-8.png" alt="" />
+                  <div className="offer-image relative h-48 w-48 mx-auto">
+                    <Image src="/img/products/item-8.png" alt="Melova Dates Chocolate Premium" fill className="object-contain" />
                   </div>
                   <div className="offer-item-content">
                     <h2>MELOVA DATES CHOCOLATE</h2>
@@ -276,7 +278,7 @@ export default async function Home() {
               <div className="about-us-item-list">
                 <div className="about-us-item wow fadeInUp">
                   <div className="icon-box">
-                    <img src="/images/icon-about-us-item-1.svg" alt="" />
+                    <Image src="/images/icon-about-us-item-1.svg" alt="Precision Icon" width={60} height={60} />
                   </div>
                   <div className="about-us-item-content">
                     <h3>Precision-Crafted Chocolates</h3>
@@ -292,7 +294,7 @@ export default async function Home() {
                   data-wow-delay="0.2s"
                 >
                   <div className="icon-box">
-                    <img src="/images/icon-about-us-item-2.svg" alt="" />
+                    <Image src="/images/icon-about-us-item-2.svg" alt="Eco Packaging Icon" width={60} height={60} />
                   </div>
                   <div className="about-us-item-content">
                     <h3>Eco-Friendly Packaging</h3>
@@ -308,7 +310,7 @@ export default async function Home() {
                   data-wow-delay="0.4s"
                 >
                   <div className="icon-box">
-                    <img src="/images/icon-about-us-item-3.svg" alt="" />
+                    <Image src="/images/icon-about-us-item-3.svg" alt="Freshness Icon" width={60} height={60} />
                   </div>
                   <div className="about-us-item-content">
                     <h3>Guaranteed Freshness</h3>
@@ -343,8 +345,8 @@ export default async function Home() {
               <div className="post-item wow fadeInUp">
                 <div className="post-featured-image">
                   <Link href="/work-of-art" data-cursor-text="View">
-                    <figure className="image-anime">
-                      <img src="/img/post-1.jpg" alt="" />
+                    <figure className="image-anime relative h-64">
+                      <Image src="/img/post-1.jpg" alt="Melova Chocolate Art" fill className="object-cover" />
                     </figure>
                   </Link>
                 </div>
@@ -367,8 +369,8 @@ export default async function Home() {
               <div className="post-item wow fadeInUp">
                 <div className="post-featured-image">
                   <Link href="/luxury-in-every-bite" data-cursor-text="View">
-                    <figure className="image-anime">
-                      <img src="/img/post-2.jpg" alt="" />
+                    <figure className="image-anime relative h-64">
+                      <Image src="/img/post-2.jpg" alt="Luxury Melova Chocolate" fill className="object-cover" />
                     </figure>
                   </Link>
                 </div>
@@ -393,8 +395,8 @@ export default async function Home() {
               <div className="post-item wow fadeInUp">
                 <div className="post-featured-image">
                   <Link href="/the-melova-story" data-cursor-text="View">
-                    <figure className="image-anime">
-                      <img src="/img/post-3.jpg" alt="" />
+                    <figure className="image-anime relative h-64">
+                      <Image src="/img/post-3.jpg" alt="The Melova Story" fill className="object-cover" />
                     </figure>
                   </Link>
                 </div>

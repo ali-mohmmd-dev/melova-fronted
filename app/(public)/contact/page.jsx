@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
@@ -45,11 +46,11 @@ export default function Contact() {
                 <div className="section-title">
                   <h3 className="wow fadeInUp">Contact us</h3>
                   <h2 className="text-anime-style-2" data-cursor="-opaque">
-                    We're here to chat and share the{" "}
+                    We&apos;re here to chat and share the{" "}
                     <span>love for pastries</span>
                   </h2>
                   <p className="wow fadeInUp" data-wow-delay="0.2s">
-                    Feel free to reach out — we're just a message away with
+                    Feel free to reach out — we&apos;re just a message away with
                     something sweet to say!
                   </p>
                 </div>
@@ -61,7 +62,7 @@ export default function Contact() {
                   <div className="contact-info-item">
                     <div className="contact-info-header">
                       <div className="icon-box">
-                        <img src="/images/icon-phone.svg" alt="" />
+                        <Image src="/images/icon-phone.svg" alt="Phone Icon" width={40} height={40} />
                       </div>
                       <div className="contact-info-title">
                         <h3>Connect now</h3>
@@ -78,7 +79,7 @@ export default function Contact() {
                   <div className="contact-info-item">
                     <div className="contact-info-header">
                       <div className="icon-box">
-                        <img src="/images/icon-mail.svg" alt="" />
+                        <Image src="/images/icon-mail.svg" alt="Mail Icon" width={40} height={40} />
                       </div>
                       <div className="contact-info-title">
                         <h3>Email us</h3>
@@ -101,7 +102,7 @@ export default function Contact() {
                   <div className="contact-info-item">
                     <div className="contact-info-header">
                       <div className="icon-box">
-                        <img src="/images/icon-location.svg" alt="" />
+                        <Image src="/images/icon-location.svg" alt="Location Icon" width={40} height={40} />
                       </div>
                       <div className="contact-info-title">
                         <h3>Visit our Factory</h3>
@@ -115,7 +116,7 @@ export default function Contact() {
                   <div className="contact-info-item">
                     <div className="contact-info-header">
                       <div className="icon-box">
-                        <img src="/images/icon-clock.svg" alt="" />
+                        <Image src="/images/icon-clock.svg" alt="Clock Icon" width={40} height={40} />
                       </div>
                       <div className="contact-info-title">
                         <h3>Working hour</h3>

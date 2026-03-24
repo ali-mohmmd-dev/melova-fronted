@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "../../context/AuthContext";
 import AdminGuard from "@/components/AdminGuard";
 import "./admin-style.css";
@@ -29,10 +30,13 @@ export default function AdminLayout({ children }) {
         <aside className="admin-sidebar">
           <div className="sidebar-header">
             <Link href="/" className="sidebar-logo">
-              <img
+              <Image
                 src="/img/melova_logo.png"
                 alt="MyMelova Admin"
+                width={120}
+                height={40}
                 style={{ maxWidth: "120px", height: "auto" }}
+                priority
               />
             </Link>
           </div>

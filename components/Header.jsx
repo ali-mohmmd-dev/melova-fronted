@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 
@@ -65,7 +66,7 @@ export default function Header() {
     // Also listen for a custom event 'cartUpdated' to refresh count
     window.addEventListener('cartUpdated', fetchCartCount);
     return () => window.removeEventListener('cartUpdated', fetchCartCount);
-  }, [token]);
+  }, [token, API_URL]);
   return (
     <>
       <header
@@ -79,11 +80,14 @@ export default function Header() {
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center">
-                <img
+                <Image
                   src="/img/melova_logo.png"
                   alt="Melova Logo"
+                  width={150}
+                  height={56}
                   className={`transition-all duration-300 w-auto drop-shadow-lg ${!isAnimatedPage || scrolled ? "h-12" : "h-14"
                     }`}
+                  priority
                 />
               </Link>
             </div>
@@ -258,9 +262,11 @@ export default function Header() {
           }`}
       >
         <div className="flex items-center justify-between p-6 border-b border-white/10">
-          <img
+          <Image
             src="/img/melova_logo.png"
             alt="Melova Logo"
+            width={120}
+            height={40}
             className="h-10 w-auto"
           />
           <button

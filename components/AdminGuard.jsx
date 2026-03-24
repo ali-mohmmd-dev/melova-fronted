@@ -8,13 +8,8 @@ export default function AdminGuard({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    console.log("AdminGuard - User:", user);
-    console.log("AdminGuard - Loading:", loading);
     const isAllowed = user?.is_staff || user?.is_superuser;
-    console.log("AdminGuard - isAllowed:", isAllowed);
-    
     if (!loading && (!user || !isAllowed)) {
-      console.log("AdminGuard - Redirecting to /");
       router.push("/");
     }
   }, [user, loading, router]);

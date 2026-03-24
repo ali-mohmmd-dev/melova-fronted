@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -416,7 +417,7 @@ const handleSubmit = async (e) => {
                         placeholder="0.00"
                         required
                       />
-                      <div className="form-text small opacity-75">Visible as 'Starting from' price</div>
+                      <div className="form-text small opacity-75">Visible as &apos;Starting from&apos; price</div>
                     </div>
                   </div>
                 </div>
@@ -560,10 +561,13 @@ const handleSubmit = async (e) => {
                         {variant.images.map((imgUrl, imgIndex) => (
                           <div className="col-lg-6" key={imgIndex}>
                             <div className="variant-image-input-group">
-                              <img
+                              <Image
                                 src={getImagePreview(imgUrl) || "https://placehold.co/100x100?text=No+Image"}
                                 className="variant-image-preview"
                                 alt="Preview"
+                                width={50}
+                                height={50}
+                                unoptimized
                                 onError={(e) => (e.target.src = "https://placehold.co/100x100?text=No+Image")}
                               />
                               <input

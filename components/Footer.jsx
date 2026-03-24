@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -22,9 +23,11 @@ export default function Footer() {
         <div className="flex flex-col items-center">
           {/* Logo */}
           <div className="mb-8 p-4 l transition-transform hover:scale-105 duration-300">
-            <img
+            <Image
               src="/img/melova_logo.png"
               alt="Melova Logo"
+              width={200}
+              height={64}
               className="h-16 w-auto drop-shadow-lg"
             />
           </div>

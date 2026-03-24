@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 
@@ -79,16 +80,17 @@ export default function ProductDetailsClient({ product }) {
                   key={i}
                   style={{ flex: "0 0 100%", minWidth: "100%" }}
                 >
-                  <img
+                  <Image
                     src={img}
                     alt={`${product.title || product.name} image ${i + 1}`}
+                    width={500}
+                    height={500}
                     style={{
                       width: "100%",
                       height: "auto",
                       borderRadius: "15px",
                       aspectRatio: "1/1",
                       objectFit: "cover",
-                      
                     }}
                   />
                 </div>

@@ -186,8 +186,8 @@ export default function ProfilePage() {
                           Password Update
                         </h3>
                         <p className="text-sm text-stone-500">
-                          To change your password, please use the "Forgot
-                          Password" link on the login page or contact support.
+                          To change your password, please use the &quot;Forgot
+                          Password&quot; link on the login page or contact support.
                         </p>
                       </div>
                       <button

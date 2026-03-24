@@ -1,7 +1,70 @@
 import Script from "next/script";
+import { Lora, Poppins, Anek_Malayalam, Arimo, Catamaran, Roboto, Plus_Jakarta_Sans, Zen_Dots } from "next/font/google";
 import { AuthProvider } from "../context/AuthContext";
 import StyledJsxRegistry from "../lib/StyledJsxRegistry";
 import "./globals.css";
+
+// Global CSS imports
+import "./styles/bootstrap.min.css";
+import "./styles/slicknav.min.css";
+import "./styles/swiper-bundle.min.css";
+import "./styles/all.min.css";
+import "./styles/animate.css";
+import "./styles/magnific-popup.css";
+import "./styles/mousecursor.css";
+import "./styles/custom.css";
+import "./styles/header.css";
+
+const lora = Lora({
+  subsets: ["latin"],
+  variable: "--font-lora",
+  display: "swap",
+});
+
+const poppins = Poppins({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
+const anekMalayalam = Anek_Malayalam({
+  subsets: ["latin"],
+  variable: "--font-anek",
+  display: "swap",
+});
+
+const arimo = Arimo({
+  subsets: ["latin"],
+  variable: "--font-arimo",
+  display: "swap",
+});
+
+const catamaran = Catamaran({
+  subsets: ["latin"],
+  variable: "--font-catamaran",
+  display: "swap",
+});
+
+const roboto = Roboto({
+  weight: ["100", "300", "400", "500", "700", "900"],
+  subsets: ["latin"],
+  variable: "--font-roboto",
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
+
+const zenDots = Zen_Dots({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-zen-dots",
+  display: "swap",
+});
 
 export const metadata = {
   title: "MyMelova | Premium Chocolate Factory & Artisanal Chocolates",
@@ -11,33 +74,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${lora.variable} ${poppins.variable} ${anekMalayalam.variable} ${arimo.variable} ${catamaran.variable} ${roboto.variable} ${plusJakartaSans.variable} ${zenDots.variable}`}>
+
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com/" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com/"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@100..800&family=Arimo:ital,wght@0,400..700;1,400..700&family=Catamaran:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Story+Script&family=Zen+Dots&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
-          rel="stylesheet"
-        />
-
-        <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen" />
-        <link href="/css/slicknav.min.css" rel="stylesheet" />
-        <link rel="stylesheet" href="/css/swiper-bundle.min.css" />
-        <link href="/css/all.min.css" rel="stylesheet" media="screen" />
-        <link href="/css/animate.css" rel="stylesheet" />
-        <link rel="stylesheet" href="/css/magnific-popup.css" />
-        <link rel="stylesheet" href="/css/mousecursor.css" />
-        <link href="/css/custom.css" rel="stylesheet" media="screen" />
-        <link href="/css/header.css" rel="stylesheet" />
-
         <Script
           src="https://accounts.google.com/gsi/client"
           strategy="beforeInteractive"
