@@ -23,8 +23,9 @@ export default function AdminCustomers() {
         });
         if (!response.ok) throw new Error("API Error");
         const data = await response.json();
-        setCustomers(data);
-        setFilteredCustomers(data);
+        const customersArray = Array.isArray(data) ? data : data.results || [];
+        setCustomers(customersArray);
+        setFilteredCustomers(customersArray);
       } catch (error) {
         console.error("Error fetching customers:", error);
       } finally {
@@ -33,6 +34,7 @@ export default function AdminCustomers() {
     }
     fetchCustomers();
   }, [token, API_URL]);
+
 
   useEffect(() => {
     const filtered = customers.filter((customer) => {
@@ -66,6 +68,8 @@ export default function AdminCustomers() {
     router.push(`/admin/customers/${id}`);
   };
   const emailCustomer = (email) => (window.location.href = `mailto:${email}`);
+
+    console.log(customers)
 
  return (
   <div className="p-6 space-y-6">

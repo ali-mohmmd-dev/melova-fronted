@@ -308,7 +308,7 @@ a:focus {
 	top: 50%;
 	right: 0;
 	transform: translateY(-50%);
-	background: url('../images/arrow-accent.svg') no-repeat;
+	background: url('/images/arrow-accent.svg') no-repeat;
 	background-position: right center;
 	background-size: cover;
 	width: 12px;
@@ -433,7 +433,7 @@ a:focus {
 	font-weight: 400;
 	font-style: italic;
 	color: var(--accent-color);
-	background-image: url('../images/icon-sparkle-accent.svg');
+	background-image: url('/images/icon-sparkle-accent.svg');
 	background-repeat: no-repeat;
 	background-position: left center;
 	background-size: 20px auto;
@@ -480,11 +480,11 @@ a:focus {
 }
 
 .about-us {
-	background: url('../img/choco-land.png') no-repeat center/cover;
+	background: url('/img/choco-land.png') no-repeat center/cover;
 }
 
 .dark-section .section-title h3 {
-	background-image: url('../images/icon-sparkle-white.svg');
+	background-image: url('/images/icon-sparkle-white.svg');
 }
 
 .help-block.with-errors ul {
@@ -841,7 +841,7 @@ header.main-header .header-sticky.active {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background: url('../images/hero-image.jpg') no-repeat;
+	background: url('/images/hero-image.jpg') no-repeat;
 	background-position: center center;
 	background-size: cover;
 	overflow: hidden;
@@ -1036,8 +1036,8 @@ header.main-header .header-sticky.active {
 	position: absolute;
 	width: 20px;
 	height: 20px;
-	mask: url('../images/hero-image-corner-shape.svg');
-	-webkit-mask: url('../images/hero-image-corner-shape.svg');
+	mask: url('/images/hero-image-corner-shape.svg');
+	-webkit-mask: url('/images/hero-image-corner-shape.svg');
 	background-color: var(--bg-color);
 	mask-repeat: no-repeat;
 	mask-size: cover;
@@ -1857,7 +1857,7 @@ header.main-header .header-sticky.active {
 
 .feature-content {
 	position: relative;
-	background: url('../images/our-feature-image.jpg') no-repeat;
+	background: url('/images/our-feature-image.jpg') no-repeat;
 	background-position: center center;
 	background-size: cover;
 	align-content: center;
@@ -1979,23 +1979,23 @@ header.main-header .header-sticky.active {
 }
 
 .our-products .product-box-1 .product-item-image figure {
-	mask-image: url('../images/product-bg-shape-1.svg');
-	background-image: url('../images/product-bg-shape-1.svg');
+	mask-image: url('/images/product-bg-shape-1.svg');
+	background-image: url('/images/product-bg-shape-1.svg');
 }
 
 .our-products .product-box-2 .product-item-image figure {
-	mask-image: url('../images/product-bg-shape-2.svg');
-	background-image: url('../images/product-bg-shape-2.svg');
+	mask-image: url('/images/product-bg-shape-2.svg');
+	background-image: url('/images/product-bg-shape-2.svg');
 }
 
 .our-products .product-box-3 .product-item-image figure {
-	mask-image: url('../images/product-bg-shape-3.svg');
-	background-image: url('../images/product-bg-shape-3.svg');
+	mask-image: url('/images/product-bg-shape-3.svg');
+	background-image: url('/images/product-bg-shape-3.svg');
 }
 
 .our-products .product-box-4 .product-item-image figure {
-	mask-image: url('../images/product-bg-shape-4.svg');
-	background-image: url('../images/product-bg-shape-4.svg');
+	mask-image: url('/images/product-bg-shape-4.svg');
+	background-image: url('/images/product-bg-shape-4.svg');
 }
 
 .our-products .product-item-image figure img {
@@ -2031,7 +2031,7 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .how-it-work {
-	background-image: url('../images/how-it-work-bg.png');
+	background-image: url('/images/how-it-work-bg.png');
 	background-repeat: no-repeat;
 	padding: 100px 0 70px;
 }
@@ -2361,7 +2361,7 @@ header.main-header .header-sticky.active {
 	left: 0;
 	right: 0;
 	transform: rotate(45deg);
-	background: url("../images/arrow-white.svg") no-repeat center center;
+	background: url("/images/arrow-white.svg") no-repeat center center;
 	background-size: 12px auto;
 	display: flex;
 	align-items: center;
@@ -2392,7 +2392,7 @@ header.main-header .header-sticky.active {
 }
 
 .testimonial-item {
-	background: url('../images/icon-testimonial-quote.svg') no-repeat;
+	background: url('/images/icon-testimonial-quote.svg') no-repeat;
 	background-position: top right;
 	background-size: 65px auto;
 }
@@ -2789,7 +2789,7 @@ header.main-header .header-sticky.active {
 
 .page-header {
 	position: relative;
-	background: var(--accent-color) url('../img/banner.png') no-repeat;
+	background: var(--accent-color) url('/img/banner.png') no-repeat;
 	background-position: center center;
 	background-size: cover;
 	padding: 160px 0;
@@ -3072,7 +3072,7 @@ header.main-header .header-sticky.active {
 
 .what-we-do {
 	position: relative;
-	background: url('../img/choco-background.png') no-repeat;
+	background: url('/img/choco-background.png') no-repeat;
 	background-position: center center;
 	background-size: cover;
 	padding: 60px;
@@ -3470,7 +3470,7 @@ header.main-header .header-sticky.active {
 	right: 20px;
 	top: 50%;
 	transform: translate(0px, -50%);
-	background: url('../images/arrow-text.svg') no-repeat;
+	background: url('/images/arrow-text.svg') no-repeat;
 	background-position: center center;
 	background-size: cover;
 	width: 12px;
@@ -3508,7 +3508,7 @@ header.main-header .header-sticky.active {
 
 .sidebar-cta-content {
 	position: relative;
-	background: url('../images/sidebar-cta-bg.jpg') no-repeat;
+	background: url('/images/sidebar-cta-bg.jpg') no-repeat;
 	background-position: center center;
 	background-size: cover;
 	padding: 170px 30px 40px;
@@ -4114,7 +4114,7 @@ header.main-header .header-sticky.active {
 }
 
 .post-entry blockquote {
-	background: url('../images/icon-blockquote.svg'), var(--bg-color);
+	background: url('/images/icon-blockquote.svg'), var(--bg-color);
 	background-repeat: no-repeat;
 	background-position: 30px 30px;
 	background-size: 45px;
@@ -5679,7 +5679,7 @@ header.main-header .header-sticky.active {
 	}
 
 	.our-services {
-		background: var(--accent-color) url(../img/banner.png) no-repeat !important;
+		background: var(--accent-color) url(/img/banner.png) no-repeat !important;
 	}
 
 
@@ -7319,9 +7319,9 @@ header.main-header .header-sticky.active {
 /* Product Card Styling */
 .product-item-content h2 {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 5px;
-  color: #ffffff;
+ 
 }
 
 .product-item-content .product-price {

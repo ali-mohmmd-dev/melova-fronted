@@ -36,8 +36,16 @@ export default function AdminDashboard() {
 
         if (!ordersRes.ok || !productsRes.ok) throw new Error("API Error");
 
-        const orders = await ordersRes.json();
-        const products = await productsRes.json();
+        const ordersData = await ordersRes.json();
+        const productsData = await productsRes.json();
+
+        const orders = Array.isArray(ordersData)
+          ? ordersData
+          : ordersData.results || [];
+
+        const products = Array.isArray(productsData)
+          ? productsData
+          : productsData.results || [];
 
         // 1. Calculate Stats
         const totalRevenue = orders.reduce(
@@ -68,12 +76,15 @@ export default function AdminDashboard() {
           }
         });
 
+        console.log(productStats);
+
         const sortedTop = Object.entries(productStats)
           .map(([id, data]) => ({ id, ...data }))
           .sort((a, b) => b.sales - a.sales)
           .slice(0, 5);
         
         setTopProducts(sortedTop);
+        
 
         // 4. Monthly Revenue for Chart
         const monthlyRevenue = new Array(12).fill(0);

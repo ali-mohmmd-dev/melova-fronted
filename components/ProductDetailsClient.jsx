@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -8,23 +8,71 @@ import axios from "axios";
 export default function ProductDetailsClient({ product }) {
   const router = useRouter();
   const { token } = useAuth();
+
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollX, setScrollX] = useState(0);
 
   const variants = product.variants || [];
   const selectedVariant =
     variants.length > 0 ? variants[selectedVariantIndex] : null;
 
   const currentPrice = selectedVariant ? selectedVariant.price : product.price;
-  const currentImages =
-    selectedVariant && selectedVariant.image
-      ? selectedVariant.image
-      : [product.image];
 
-  // Swiper state
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  // ✅ API image handling
+  const currentImages =
+    selectedVariant?.images?.length
+      ? selectedVariant.images.map((img) => img.image)
+      : product.image
+        ? [product.image]
+        : ["/placeholder.png"];
+
+  // ✅ Auto-slide
+  useEffect(() => {
+    if (currentImages.length <= 1 || isHovered) return;
+
+    const interval = setInterval(() => {
+      setActiveImageIndex((prev) =>
+        prev === currentImages.length - 1 ? 0 : prev + 1
+      );
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentImages, isHovered]);
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const diff = e.pageX - startX;
+    setScrollX(diff);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+
+    const threshold = 80; // drag distance to change slide
+    if (scrollX > threshold && activeImageIndex > 0) {
+      setActiveImageIndex(activeImageIndex - 1);
+    } else if (
+      scrollX < -threshold &&
+      activeImageIndex < currentImages.length - 1
+    ) {
+      setActiveImageIndex(activeImageIndex + 1);
+    }
+
+    setScrollX(0);
+  };
 
   const handleAddToCart = async (e, silent = false) => {
     if (e) e.preventDefault();
+
     if (!token) {
       alert("Please login to add items to cart.");
       router.push("/login?redirect=" + window.location.pathname);
@@ -32,13 +80,15 @@ export default function ProductDetailsClient({ product }) {
     }
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
+
       await axios.post(
         `${API_URL}api/shop/cart/add_item/`,
         { variant_id: selectedVariant.id, quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Trigger header refresh
+
       window.dispatchEvent(new Event("cartUpdated"));
       if (!silent) alert("Added to cart!");
       return true;
@@ -52,43 +102,52 @@ export default function ProductDetailsClient({ product }) {
   const handleOrderNow = async (e) => {
     if (e) e.preventDefault();
     const added = await handleAddToCart(null, true);
-    if (added) {
-      router.push("/cart");
-    }
+    if (added) router.push("/cart");
   };
 
   return (
     <>
-      {/* Product Image */}
+      {/* Product Images */}
       <div className="col-lg-6 mb-4">
-        <div className="product-details-image wow fadeInUp">
+        <div
+          className="product-details-image wow fadeInUp"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
           <div
-            className="swiper productDetailSwiper"
-            style={{ overflow: "hidden", position: "relative" }}
+            style={{
+              overflow: "hidden",
+              position: "relative",
+              borderRadius: "15px",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.10)",
+              background: "#fff",
+            }}
           >
+            {/* Slides */}
             <div
-              className="swiper-wrapper"
               style={{
                 display: "flex",
-                transition: "transform 0.3s ease",
-                transform: `translateX(-${activeImageIndex * 100}%)`,
+                transition: isDragging ? "none" : "transform 0.4s ease",
+                transform: `translateX(calc(-${activeImageIndex * 100}% + ${scrollX}px))`,
+                cursor: isDragging ? "grabbing" : "grab",
               }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
             >
               {currentImages.map((img, i) => (
-                <div
-                  className="swiper-slide"
-                  key={i}
-                  style={{ flex: "0 0 100%", minWidth: "100%" }}
-                >
+                <div key={i} style={{ flex: "0 0 100%", minWidth: "100%" }}>
                   <Image
+                    draggable={false}
                     src={img}
                     alt={`${product.title || product.name} image ${i + 1}`}
-                    width={500}
-                    height={500}
+                    width={600}
+                    height={600}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  
                     style={{
                       width: "100%",
                       height: "auto",
-                      borderRadius: "15px",
                       aspectRatio: "1/1",
                       objectFit: "cover",
                     }}
@@ -96,80 +155,58 @@ export default function ProductDetailsClient({ product }) {
                 </div>
               ))}
             </div>
-
-            {currentImages.length > 1 && (
-              <>
-                <div
-                  className="swiper-button-next scroll-btn"
-                  onClick={() =>
-                    setActiveImageIndex((prev) =>
-                      Math.min(prev + 1, currentImages.length - 1),
-                    )
-                  }
-                  style={{
-                    position: "absolute",
-                    right: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    zIndex: 10,
-                    cursor: "pointer",
-                    background: "#fff",
-                    borderRadius: "50%",
-                    padding: "10px",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  &rarr;
-                </div>
-                <div
-                  className="swiper-button-prev scroll-btn"
-                  onClick={() =>
-                    setActiveImageIndex((prev) => Math.max(prev - 1, 0))
-                  }
-                  style={{
-                    position: "absolute",
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    zIndex: 10,
-                    cursor: "pointer",
-                    background: "#fff",
-                    borderRadius: "50%",
-                    padding: "10px",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  &larr;
-                </div>
-              </>
-            )}
           </div>
+
+          {/* Dots */}
+          {currentImages.length > 1 && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "8px",
+                marginTop: "14px",
+              }}
+            >
+              {currentImages.map((_, i) => (
+                <span
+                  key={i}
+                  onClick={() => setActiveImageIndex(i)}
+                  style={{
+                    width: "10px",
+                    height: "10px",
+                    borderRadius: "50%",
+                    cursor: "pointer",
+                    transition: "background 0.3s",
+                    background: i === activeImageIndex ? "#000" : "#ccc",
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Product Info */}
       <div className="col-lg-6">
-        <div
-          className="product-details-content wow fadeInUp"
-          data-wow-delay="0.2s"
-        >
-          <h1 id="productName" className="text-anime-style-2">
+        <div className="product-details-content wow fadeInUp">
+          <h1 className="text-anime-style-2">
             {product.title || product.name}
           </h1>
 
           <div className="product-price mt-3 mb-3">
             <h3 className="text-primary">
-              Starting from ₹
-              <span className="productPrice">{currentPrice}</span>
+              Starting from ₹{currentPrice}
             </h3>
           </div>
 
           <div className="product-description mb-4">
-            <p className="lead">{product.introduction || product.intro}</p>
-            <p>{product.description}</p>
+            <p className="lead">
+              {product.introduction || product.intro}
+            </p>
+            <p>{product.details || product.description}</p>
           </div>
 
-          {/* Variants Selection */}
+          {/* Variants */}
           {variants.length > 0 && (
             <div className="product-variants mb-4">
               <h5>Available Sizes:</h5>
@@ -177,24 +214,25 @@ export default function ProductDetailsClient({ product }) {
                 {variants.map((variant, index) => (
                   <button
                     key={variant.id}
-                    className={`btn btn-outline-dark variant-btn ${index === selectedVariantIndex ? "active bg-dark text-white" : ""}`}
+                    className={`btn btn-outline-dark ${index === selectedVariantIndex
+                        ? "active bg-dark text-white"
+                        : ""
+                      }`}
                     onClick={() => {
                       setSelectedVariantIndex(index);
-                      setActiveImageIndex(0); // Reset slider when variant changes
+                      setActiveImageIndex(0);
                     }}
                   >
-                    {variant.name} - {variant.gram}g
+                    {variant.name} - {variant.weight}g
                   </button>
                 ))}
               </div>
             </div>
           )}
 
+          {/* Actions */}
           <div className="product-actions mt-5 d-flex flex-wrap gap-3">
-            <button
-              className="btn-default"
-              onClick={handleAddToCart}
-            >
+            <button className="btn-default" onClick={handleAddToCart}>
               Add to Cart
             </button>
             <button

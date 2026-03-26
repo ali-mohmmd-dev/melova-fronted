@@ -6,6 +6,9 @@ import ProductCard from "./ProductCard";
 export default function ProductsScroll({ products }) {
   const scrollerRef = useRef(null);
 
+  // Ensure products is always an array
+  const safeProducts = Array.isArray(products) ? products : [];
+
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
@@ -63,7 +66,7 @@ export default function ProductsScroll({ products }) {
         aria-label="Our products (horizontal scroll)"
         ref={scrollerRef}
       >
-        {products.map((product) => (
+        {safeProducts.map((product) => (
           <div className="col-lg-3" key={product.id}>
             <ProductCard product={product} />
           </div>

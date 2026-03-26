@@ -24,8 +24,9 @@ export default function AdminOrders() {
         });
         if (!response.ok) throw new Error("API Error");
         const data = await response.json();
-        setOrders(data);
-        setFilteredOrders(data);
+        const ordersArray = Array.isArray(data) ? data : data.results || [];
+        setOrders(ordersArray);
+        setFilteredOrders(ordersArray);
       } catch (error) {
         console.error("Error fetching orders:", error);
       } finally {
@@ -77,6 +78,32 @@ export default function AdminOrders() {
       year: "numeric",
     });
   };
+
+  const deleteOrder = async (id) => {
+  const confirmDelete = confirm(`Are you sure you want to delete Order #${id}?`);
+  if (!confirmDelete) return;
+
+  try {
+    const response = await fetch(`${API_URL}api/shop/orders/${id}/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("Failed to delete");
+
+    // Remove deleted order from state (instant UI update)
+    const updatedOrders = orders.filter((order) => order.id !== id);
+    setOrders(updatedOrders);
+    setFilteredOrders(updatedOrders);
+
+    alert("Order deleted successfully");
+  } catch (error) {
+    console.error("Delete error:", error);
+    alert("Failed to delete order");
+  }
+};
 
   const viewOrder = (id) => {
     router.push(`/admin/orders/${id}`);
@@ -226,6 +253,14 @@ export default function AdminOrders() {
                         className="px-2 py-1 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
                       >
                         <i className="fas fa-print"></i>
+                      </button>
+
+                      <button
+                        onClick={() => deleteOrder(order.id)}
+                        title="Delete Order"
+                        className="px-2 py-1 text-xs font-medium text-white bg-rose-600 rounded-md hover:bg-rose-700"
+                      >
+                        <i className="fas fa-trash"></i>
                       </button>
                     </div>
                   </td>

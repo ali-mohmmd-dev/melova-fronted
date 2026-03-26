@@ -235,7 +235,7 @@ export default function AdminProducts() {
                         {product.image ? (
                           <Image
                             src={product.image}
-                            alt={product.title}
+                            alt={product.title || "product image"}
                             fill
                             className="object-cover"
                           />
@@ -249,15 +249,15 @@ export default function AdminProducts() {
 
                     {/* Name */}
                     <td className="px-3 py-2">
-                      <p className="font-semibold">{product.title}</p>
+                      <p className="font-semibold">{product.name}</p>
                     </td>
 
                     {/* Description */}
                     <td className="px-3 py-2 max-w-[240px]">
                       <p className="text-gray-600">
-                        {product.introduction && product.introduction.length > 60
-                          ? `${product.introduction.substring(0, 60)}...`
-                          : product.introduction}
+                        {product.intro && product.intro.length > 60
+                          ? `${product.intro.substring(0, 60)}...`
+                          : product.intro}
                       </p>
                     </td>
 

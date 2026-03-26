@@ -81,6 +81,7 @@ export default function RootLayout({ children }) {
           src="https://accounts.google.com/gsi/client"
           strategy="beforeInteractive"
         />
+        <link href="https://fonts.googleapis.com/css2?family=Story+Script&display=swap" rel="stylesheet"></link>
       </head>
       <body>
         <AuthProvider>

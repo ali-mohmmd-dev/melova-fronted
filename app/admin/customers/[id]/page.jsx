@@ -32,7 +32,8 @@ export default function AdminCustomerDetails() {
         }
 
         const allCustomers = await customersRes.json();
-        const customerData = allCustomers.find(
+        const allCustomersArray = Array.isArray(allCustomers) ? allCustomers : allCustomers.results || [];
+        const customerData = allCustomersArray.find(
           (c) => String(c.id) === String(id)
         );
 
@@ -48,7 +49,8 @@ export default function AdminCustomerDetails() {
 
         if (ordersRes.ok) {
           const allOrders = await ordersRes.json();
-          const customerOrders = allOrders.filter(
+          const allOrdersArray = Array.isArray(allOrders) ? allOrders : allOrders.results || [];
+          const customerOrders = allOrdersArray.filter(
             (order) =>
               String(order.customer) === String(id) ||
               (customerData?.email && order.user_email === customerData.email)

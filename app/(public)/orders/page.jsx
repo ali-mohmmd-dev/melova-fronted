@@ -14,7 +14,7 @@ export default function MyOrdersPage() {
   const fetchOrders = React.useCallback(async () => {
     if (!token) return;
     try {
-      const res = await axios.get(`${API_URL}api/shop/orders/`, {
+      const res = await axios.get(`${API_URL}api/shop/orders/my_orders/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Sort orders by newest first

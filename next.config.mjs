@@ -23,6 +23,19 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.googleusercontent.com",
       },
+      {
+        protocol: "https",
+        hostname: "api.mymelova.com",
+        pathname: "/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "developers.google.com",
+      },
+       {
+        protocol: "https",
+        hostname: "placehold.co",
+      },
     ],
   },
 };
