@@ -13,6 +13,11 @@ export default function Header() {
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
@@ -85,6 +90,7 @@ export default function Header() {
                   alt="Melova Logo"
                   width={150}
                   height={56}
+                  quality={90}
                   className={`transition-all duration-300 w-auto drop-shadow-lg ${!isAnimatedPage || scrolled ? "h-12" : "h-14"
                     }`}
                   priority
@@ -121,7 +127,7 @@ export default function Header() {
             <div className="hidden lg:flex items-center space-x-6">
               {/* Profile Dropdown */}
               <div className="relative" ref={dropdownRef}>
-                {user ? (
+                {mounted && user ? (
                   <>
                     <button
                       onClick={() =>
@@ -267,6 +273,7 @@ export default function Header() {
             alt="Melova Logo"
             width={120}
             height={40}
+            quality={90}
             className="h-10 w-auto"
           />
           <button
@@ -323,7 +330,7 @@ export default function Header() {
             <div className="h-px bg-white/10 my-2"></div>
 
             <div className="pt-2">
-              {user ? (
+              {mounted && user ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 px-2 py-3 bg-white/5 rounded-xl border border-white/10">
                     <div className="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center text-white font-bold text-lg">

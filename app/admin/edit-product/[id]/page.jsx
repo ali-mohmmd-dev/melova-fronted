@@ -40,7 +40,7 @@ export default function AdminEditProduct() {
             introduction: data.introduction || "",
             details: data.details || ""
           });
-          
+
           // Map backend variants to our frontend state
           const mappedVariants = (data.variants || []).map((v) => ({
             id: v.id,
@@ -51,13 +51,13 @@ export default function AdminEditProduct() {
             images: (v.images || []).map(imgObj => imgObj.image || imgObj), // images is list of strings/URLs
             backendId: v.id // Keep track of backend ID
           }));
-          
+
           if (mappedVariants.length === 0) {
             mappedVariants.push({ id: Date.now(), name: "", gram: "", price: "", isPrimary: true, images: [""] });
           } else {
             mappedVariants[0].isPrimary = true;
           }
-          
+
           setVariants(mappedVariants);
         } else {
           setError("Product not found");
@@ -157,7 +157,7 @@ export default function AdminEditProduct() {
   };
 
   const refreshAccessToken = async () => {
-    const refreshToken = sessionStorage.getItem("melova_refresh");
+    const refreshToken = localStorage.getItem("melova_refresh");
     if (!refreshToken) return null;
     try {
       const response = await axios.post(
@@ -165,7 +165,7 @@ export default function AdminEditProduct() {
         { refresh: refreshToken }
       );
       const newAccessToken = response.data.access;
-      sessionStorage.setItem("melova_token", newAccessToken);
+      localStorage.setItem("melova_token", newAccessToken);
       return newAccessToken;
     } catch (error) {
       console.error("Token refresh failed:", error);
@@ -179,20 +179,25 @@ export default function AdminEditProduct() {
     e.preventDefault();
     setSaving(true);
     setError(null);
-    
+
     try {
       const formData = new FormData();
       formData.append('title', productData.title);
       formData.append('introduction', productData.introduction);
       formData.append('details', productData.details);
       formData.append('price', productData.price);
-      
+
       variants.forEach((variant, index) => {
         const variantName = variant.name || `${variant.gram || '0'}g`;
         formData.append(`variants[${index}][name]`, variantName);
         formData.append(`variants[${index}][weight]`, variant.gram || '0');
         formData.append(`variants[${index}][price]`, variant.price || '0');
-        
+
+        if (variant.backendId) {
+          formData.append(`variants[${index}][id]`, variant.backendId);
+        }
+
+
         // Handle images
         if (variant.images) {
           variant.images.forEach((file) => {
@@ -209,9 +214,9 @@ export default function AdminEditProduct() {
           });
         }
       });
-      
-      let currentToken = sessionStorage.getItem("melova_token");
-      
+
+      let currentToken = localStorage.getItem("melova_token");
+
       let response = await fetch(`${API_URL}api/shop/products/${id}/`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${currentToken}` },
@@ -300,7 +305,7 @@ export default function AdminEditProduct() {
                     type="text"
                     className="form-control"
                     value={productData.title}
-                    onChange={(e) => setProductData({...productData, title: e.target.value})}
+                    onChange={(e) => setProductData({ ...productData, title: e.target.value })}
                     required
                   />
                 </div>
@@ -313,7 +318,7 @@ export default function AdminEditProduct() {
                     step="0.01"
                     className="form-control"
                     value={productData.price}
-                    onChange={(e) => setProductData({...productData, price: e.target.value})}
+                    onChange={(e) => setProductData({ ...productData, price: e.target.value })}
                     required
                   />
                 </div>
@@ -325,7 +330,7 @@ export default function AdminEditProduct() {
                 className="form-control"
                 rows="2"
                 value={productData.introduction}
-                onChange={(e) => setProductData({...productData, introduction: e.target.value})}
+                onChange={(e) => setProductData({ ...productData, introduction: e.target.value })}
                 required
               ></textarea>
             </div>
@@ -335,7 +340,7 @@ export default function AdminEditProduct() {
                 className="form-control"
                 rows="6"
                 value={productData.details}
-                onChange={(e) => setProductData({...productData, details: e.target.value})}
+                onChange={(e) => setProductData({ ...productData, details: e.target.value })}
                 required
               ></textarea>
             </div>
@@ -415,6 +420,7 @@ export default function AdminEditProduct() {
                             alt="Product Preview"
                             width={50}
                             height={50}
+                            quality={90}
                             unoptimized
                           />
                           <input type="file" accept="image/*" className="form-control form-control-sm" onChange={(e) => {

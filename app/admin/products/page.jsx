@@ -237,6 +237,7 @@ export default function AdminProducts() {
                             src={product.image}
                             alt={product.title || "product image"}
                             fill
+                            quality={90}
                             className="object-cover"
                           />
                         ) : (

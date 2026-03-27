@@ -144,6 +144,7 @@ export default function ProductDetailsClient({ product }) {
                     alt={`${product.title || product.name} image ${i + 1}`}
                     width={600}
                     height={600}
+                    quality={90}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  
                     style={{
                       width: "100%",

@@ -137,6 +137,7 @@ export default function CartPage() {
                     }
                     alt={item.variant_details.name}
                     fill
+                    quality={90}
                     className="object-cover"
                   />
                 </div>

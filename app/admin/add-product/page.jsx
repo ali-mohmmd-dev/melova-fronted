@@ -106,7 +106,7 @@ const addVariant = () => {
 
   // Function to refresh the token using your existing refresh token
   const refreshAccessToken = async () => {
-    const refreshToken = sessionStorage.getItem("melova_refresh");
+    const refreshToken = localStorage.getItem("melova_refresh");
 
     if (!refreshToken) {
       return null;
@@ -121,7 +121,7 @@ const addVariant = () => {
       const newAccessToken = response.data.access;
 
       // Update token in localStorage and axios headers
-      sessionStorage.setItem("melova_token", newAccessToken);
+      localStorage.setItem("melova_token", newAccessToken);
       axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
 
       return newAccessToken;
@@ -188,7 +188,7 @@ const handleSubmit = async (e) => {
     }
     
     // Get the current token
-    let currentToken = sessionStorage.getItem("melova_token");
+    let currentToken = localStorage.getItem("melova_token");
     console.log('Using token:', currentToken ? 'Token exists' : 'No token');
     
     // Make the request
@@ -567,6 +567,7 @@ const handleSubmit = async (e) => {
                                 alt="Preview"
                                 width={50}
                                 height={50}
+                                quality={90}
                                 unoptimized
                                 onError={(e) => (e.target.src = "https://placehold.co/100x100?text=No+Image")}
                               />
