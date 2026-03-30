@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import api from "@/lib/axios";
 
 export default function AdminOrderDetails() {
   const router = useRouter();
@@ -19,11 +20,8 @@ export default function AdminOrderDetails() {
       if (!token || !id) return;
 
       try {
-        const response = await fetch(`${API_URL}api/shop/orders/${id}/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) throw new Error("Failed to fetch order details");
-        const data = await response.json();
+        const response = await api.get(`api/shop/orders/${id}/`);
+        const data = response.data;
         setOrder(data);
       } catch (error) {
         console.error("Error fetching order details:", error);
@@ -38,17 +36,8 @@ export default function AdminOrderDetails() {
     setUpdating(true);
 
     try {
-      const response = await fetch(`${API_URL}api/shop/orders/${id}/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update status");
-      const updatedOrder = await response.json();
+      const response = await api.patch(`api/shop/orders/${id}/`, { status: newStatus });
+      const updatedOrder = response.data;
       setOrder(updatedOrder);
       alert(`Order status updated to ${newStatus}`);
     } catch (error) {

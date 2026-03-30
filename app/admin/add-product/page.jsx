@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
+import api from "@/lib/axios";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -104,35 +105,6 @@ const addVariant = () => {
     return URL.createObjectURL(img);
   };
 
-  // Function to refresh the token using your existing refresh token
-  const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem("melova_refresh");
-
-    if (!refreshToken) {
-      return null;
-    }
-
-    try {
-      const response = await axios.post(
-        `${API_URL}api/token/refresh/`,
-        { refresh: refreshToken }
-      );
-
-      const newAccessToken = response.data.access;
-
-      // Update token in localStorage and axios headers
-      localStorage.setItem("melova_token", newAccessToken);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
-
-      return newAccessToken;
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      // If refresh fails, logout the user
-      logout();
-      router.push('/admin/login?redirect=/admin/products/add');
-      return null;
-    }
-  };
 
 const handleSubmit = async (e) => {
   e.preventDefault();
@@ -187,51 +159,13 @@ const handleSubmit = async (e) => {
       console.log('FormData entry:', pair[0], pair[1] instanceof File ? pair[1].name : pair[1]);
     }
     
-    // Get the current token
-    let currentToken = localStorage.getItem("melova_token");
-    console.log('Using token:', currentToken ? 'Token exists' : 'No token');
+    // Make the request using our centralized api instance
+    const res = await api.post("api/shop/products/", formData);
     
-    // Make the request
-    let response = await fetch(`${API_URL}api/shop/products/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${currentToken}`,
-      },
-      body: formData,
-    });
-    
-    
+    console.log('Product created successfully:', res.data);
 
-      // If token expired (401), try to refresh it
-      if (response.status === 401) {
-        console.log("Token expired, attempting to refresh...");
-
-        const newToken = await refreshAccessToken();
-
-        if (newToken) {
-          // Retry the request with the new token
-          response = await fetch(`${API_URL}api/shop/products/`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${newToken}`,
-            },
-            body: formData,
-          });
-        }
-      }
-
-      // Check if the request was successful
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Server error details:', errorData);
-        throw new Error(JSON.stringify(errorData));
-      }
-
-      const result = await response.json();
-      console.log('Product created successfully:', result);
-
-      // Success - redirect to products list
-      router.push('/admin/products');
+    // Success - redirect to products list
+    router.push('/admin/products');
 
     } catch (err) {
       console.error('Submission error:', err);

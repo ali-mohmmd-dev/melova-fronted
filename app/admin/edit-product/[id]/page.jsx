@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
+import api from "@/lib/axios";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
@@ -42,19 +43,26 @@ export default function AdminEditProduct() {
           });
 
           // Map backend variants to our frontend state
-          const mappedVariants = (data.variants || []).map((v) => ({
-            id: v.id,
-            name: v.name || "",
-            gram: v.weight || v.gram || "",
-            price: v.price || "",
-            isPrimary: false, // You can determine this logic if needed
-            images: (v.images || []).map(imgObj => imgObj.image || imgObj), // images is list of strings/URLs
-            backendId: v.id // Keep track of backend ID
-          }));
+          const mappedVariants = (data.variants || []).map((v) => {
+            const variantImages = (v.images || []).map(imgObj => imgObj.image || imgObj);
+            // Ensure at least one image slot to keep the UI input visible
+            const imagesToShow = variantImages.length > 0 ? variantImages : [""];
+            
+            return {
+              id: v.id,
+              name: v.name || "",
+              gram: v.weight ?? v.gram ?? "",
+              price: v.price ?? "",
+              isPrimary: false,
+              images: imagesToShow,
+              backendId: v.id
+            };
+          });
 
           if (mappedVariants.length === 0) {
             mappedVariants.push({ id: Date.now(), name: "", gram: "", price: "", isPrimary: true, images: [""] });
           } else {
+            // Determine primary variant (one with lowest price or just first)
             mappedVariants[0].isPrimary = true;
           }
 
@@ -156,24 +164,6 @@ export default function AdminEditProduct() {
     return URL.createObjectURL(img);
   };
 
-  const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem("melova_refresh");
-    if (!refreshToken) return null;
-    try {
-      const response = await axios.post(
-        `${API_URL}api/token/refresh/`,
-        { refresh: refreshToken }
-      );
-      const newAccessToken = response.data.access;
-      localStorage.setItem("melova_token", newAccessToken);
-      return newAccessToken;
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      logout();
-      router.push(`/admin/login?redirect=/admin/edit-product/${id}`);
-      return null;
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -215,34 +205,14 @@ export default function AdminEditProduct() {
         }
       });
 
-      let currentToken = localStorage.getItem("melova_token");
+      // Make the request using our centralized api instance
+      const res = await api.put(`api/shop/products/${id}/`, formData);
 
-      let response = await fetch(`${API_URL}api/shop/products/${id}/`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${currentToken}` },
-        body: formData,
-      });
-
-      if (response.status === 401) {
-        const newToken = await refreshAccessToken();
-        if (newToken) {
-          response = await fetch(`${API_URL}api/shop/products/${id}/`, {
-            method: 'PUT',
-            headers: { 'Authorization': `Bearer ${newToken}` },
-            body: formData,
-          });
-        }
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(JSON.stringify(errorData));
-      }
-
+      console.log('Update success:', res.data);
       router.push('/admin/products');
     } catch (err) {
-      console.error('Update error:', err);
-      setError(err.message || 'Failed to update product');
+      console.error('Update error details:', err.response?.data || err);
+      setError(err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to update product');
     } finally {
       setSaving(false);
     }

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import api from "@/lib/axios";
 
 export default function AdminOrders() {
   const router = useRouter();
@@ -17,13 +18,8 @@ export default function AdminOrders() {
     async function fetchOrders() {
       if (!token) return;
       try {
-        const response = await fetch(`${API_URL}api/shop/orders/`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        if (!response.ok) throw new Error("API Error");
-        const data = await response.json();
+        const response = await api.get("api/shop/orders/");
+        const data = response.data;
         const ordersArray = Array.isArray(data) ? data : data.results || [];
         setOrders(ordersArray);
         setFilteredOrders(ordersArray);
@@ -84,14 +80,7 @@ export default function AdminOrders() {
   if (!confirmDelete) return;
 
   try {
-    const response = await fetch(`${API_URL}api/shop/orders/${id}/`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) throw new Error("Failed to delete");
+    await api.delete(`api/shop/orders/${id}/`);
 
     // Remove deleted order from state (instant UI update)
     const updatedOrders = orders.filter((order) => order.id !== id);

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getProducts } from "@/lib/product-data";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
+import api from "@/lib/axios";
 
 export default function AdminProducts() {
   const { token } = useAuth();
@@ -91,25 +92,9 @@ export default function AdminProducts() {
       )
     ) {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
-        const res = await fetch(`${API_URL}api/shop/products/${id}/`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (res.ok) {
-          setProducts((prev) => prev.filter((p) => p.id !== id));
-          console.log(`Product ${id} deleted successfully.`);
-        } else {
-          try {
-            const errorData = await res.json();
-            alert(`Delete failed: ${JSON.stringify(errorData)}`);
-          } catch (e) {
-            alert(`Delete failed with status: ${res.status}`);
-          }
-        }
+        const res = await api.delete(`api/shop/products/${id}/`);
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+        console.log(`Product ${id} deleted successfully.`);
       } catch (error) {
         console.error("Error deleting product:", error);
         alert("An error occurred while deleting the product.");
