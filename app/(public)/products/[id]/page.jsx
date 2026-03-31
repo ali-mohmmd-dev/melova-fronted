@@ -5,6 +5,14 @@ import ProductDetailsClient from "@/components/ProductDetailsClient";
 import ProductsScroll from "@/components/ProductsScroll";
 import { RevealWrapper, RevealItem } from "@/components/animations/RevealAnimation";
 
+export async function generateStaticParams() {
+  const products = await getProducts();
+  if (!products) return [];
+  return products.map((product) => ({
+    id: String(product.id),
+  }));
+}
+
 export async function generateMetadata({ params }) {
   const products = await getProducts();
   const product = products.find((p) => p.id === parseInt(params.id));

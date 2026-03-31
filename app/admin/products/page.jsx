@@ -82,7 +82,7 @@ export default function AdminProducts() {
   };
 
   const editProduct = (id) => {
-    window.location.href = `/admin/edit-product/${id}`;
+    window.location.href = `/admin/edit-product?id=${id}`;
   };
 
   const deleteProduct = async (id, name) => {

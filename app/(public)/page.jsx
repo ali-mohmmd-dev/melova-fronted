@@ -155,7 +155,7 @@ export default async function Home() {
               {/* About Us Images Start */}
               <div className="about-us-images">
                 {/* About Image Start */}
-                <RevealItem className="about-image relative h-[500px]">
+                <RevealItem className="about-image relative md:h-[500px]">
                   <Image
                     src="/img/melova-11.png"
                     alt="Finest Chocolates"
@@ -201,10 +201,10 @@ export default async function Home() {
               {/* Offers Item List Start */}
               <div className="offers-item-list offer-list-1">
                 <RevealItem className="offer-item wow fadeInUp">
-                  <div className="offer-image relative h-48 w-48 mx-auto">
+                  <div className="offer-image relative h-20 w-20 sm:h-32 sm:w-32 md:h-48 md:w-48 mx-auto">
                     <Image src="/img/products/item-4.png" alt="Angel Chocolate Bars" width={200} height={200} quality={90} className="object-cover" />
                   </div>
-                  <div className="offer-item-content ml-8">
+                  <div className="offer-item-content ml-5 md:ml-8">
                     <h2>ANGEL CHOCOLATE BARS</h2>
                     <p>
                       Rich, velvety chocolate truffles with a melt-in-mouth
@@ -217,7 +217,7 @@ export default async function Home() {
                   <div className="offer-image relative h-48 w-48 mx-auto">
                     <Image src="/img/products/item-5.png" alt="Pistachio Kunafa" width={200} height={200} quality={90} className="object-cover" />
                   </div>
-                  <div className="offer-item-content ml-8">
+                  <div className="offer-item-content ml-5 md:ml-8">
                     <h2>
                       PISTACHIO
                       <br />
@@ -245,7 +245,7 @@ export default async function Home() {
                   className="best-offer-image wow fadeInUp"
                   data-wow-delay="0.2s"
                 >
-                  <figure className="relative h-96 w-full">
+                  <figure className="relative h-64 md:h-96 w-full">
                     <Image src="/img/offer.png" alt="Best Offers" fill quality={90} className="!object-contain" />
                   </figure>
                 </div>
@@ -259,7 +259,7 @@ export default async function Home() {
                   <div className="offer-image relative h-48 w-48 mx-auto">
                     <Image src="/img/products/item-7.png" alt="Melova Dates Chocolate" width={200} height={200} quality={90} className="object-cover" />
                   </div>
-                  <div className="offer-item-content ml-8">
+                  <div className="offer-item-content ml-5 md:ml-8">
                     <h2>MELOVA DATES CHOCOLATE</h2>
                     <p>       
                       Soft sponge cake with a gooey molten chocolate center.
@@ -271,7 +271,7 @@ export default async function Home() {
                   <div className="offer-image relative h-48 w-48 mx-auto">
                     <Image src="/img/products/item-8.png" alt="Melova Dates Chocolate Premium" width={200} height={200} quality={90} className="object-cover" />
                   </div>
-                  <div className="offer-item-content ml-8">
+                  <div className="offer-item-content ml-5 md:ml-8">
                     <h2>MELOVA DATES CHOCOLATE</h2>
                     <p>
                       Crunchy roasted almonds dipped in smooth milk chocolate.

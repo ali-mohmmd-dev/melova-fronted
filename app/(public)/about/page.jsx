@@ -14,7 +14,7 @@ export default function About() {
     <>
       {/* Page Header Start */}
       <div
-        className="page-header bg-section parallaxie"
+        className="page-header !pt-[250px] sm:!pt-auto bg-section parallaxie "
         style={{ background: "url('/img/banner.png')" }}
       >
         <RevealWrapper className="container">
@@ -153,7 +153,7 @@ export default function About() {
       {/* Why Choose Us Section Start */}
       <div className="why-choose-us bg-section">
         <RevealWrapper className="container">
-          <div className="row">
+          <div className="row md:items-center">
             <div className="col-lg-6">
               {/* Why Choose Content Start */}
               <div className="why-choose-content">
@@ -162,7 +162,7 @@ export default function About() {
                     <h3 className="wow fadeInUp">Why choose us</h3>
                   </RevealItem>
                   <RevealItem>
-                    <h2 className="text-anime-style-2" data-cursor="-opaque">
+                    <h2 className="text-anime-style-2 mb-3" data-cursor="-opaque">
                       From Our Factory to You – Chocolate You Can Trust{" "}
                     </h2>
                   </RevealItem>
@@ -283,8 +283,8 @@ export default function About() {
       {/* Why Choose Us Section End */}
 
       {/* What We Do Section Start */}
-      <div className="what-we-do bg-section parallaxie">
-        <RevealWrapper className="container-fluid">
+      <div className="  what-we-do bg-section parallaxie ">
+        <RevealWrapper className="container-fluid ">
           <div className="row no-gutters align-items-center">
             <div className="col-lg-6">
               {/* What We Video Start */}

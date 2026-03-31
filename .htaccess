@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# 1. Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2. Check for the matching .html file
+# This allows clean URLs (e.g. /about will serve about.html)
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^(.+)$ /$1.html [L]
+
+# 3. Fallback to index.html for Single Page (CSR) dynamic routes
+# This is required for routes we refactored to use search parameters
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.html [L]
+
+# Handle 404 errors (if you have an app/not-found.js)
+ErrorDocument 404 /404.html

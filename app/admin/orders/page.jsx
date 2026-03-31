@@ -11,7 +11,6 @@ export default function AdminOrders() {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
   const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
@@ -30,7 +29,7 @@ export default function AdminOrders() {
       }
     }
     fetchOrders();
-  }, [token, API_URL]);
+  }, [token]);
 
   useEffect(() => {
     const filtered = orders.filter((order) => {
@@ -95,7 +94,7 @@ export default function AdminOrders() {
 };
 
   const viewOrder = (id) => {
-    router.push(`/admin/orders/${id}`);
+    router.push(`/admin/orders/detail?id=${id}`);
   };
   const printInvoice = (id) => alert(`Printing invoice for Order #${id}`);
 

@@ -11,7 +11,6 @@ export default function AdminCustomers() {
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
   useEffect(() => {
     async function fetchCustomers() {
@@ -29,7 +28,7 @@ export default function AdminCustomers() {
       }
     }
     fetchCustomers();
-  }, [token, API_URL]);
+  }, [token]);
 
 
   useEffect(() => {
@@ -61,9 +60,8 @@ export default function AdminCustomers() {
   };
 
   const viewCustomer = (id) => {
-    router.push(`/admin/customers/${id}`);
+    router.push(`/admin/customers/detail?id=${id}`);
   };
-  const emailCustomer = (email) => (window.location.href = `mailto:${email}`);
 
     console.log(customers)
 
@@ -186,13 +184,6 @@ export default function AdminCustomers() {
                         <i className="fas fa-eye"></i>
                       </button>
 
-                      <button
-                        onClick={() => emailCustomer(customer.email)}
-                        title="Email Customer"
-                        className="px-2 py-1 text-xs font-medium text-white bg-amber-500 rounded-md hover:bg-amber-600"
-                      >
-                        <i className="fas fa-envelope"></i>
-                      </button>
 
                     </div>
                   </td>

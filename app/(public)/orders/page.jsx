@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
+import api from "@/lib/axios";
 import { RevealWrapper, RevealItem } from "@/components/animations/RevealAnimation";
 
 export default function MyOrdersPage() {
@@ -15,9 +15,7 @@ export default function MyOrdersPage() {
   const fetchOrders = React.useCallback(async () => {
     if (!token) return;
     try {
-      const res = await axios.get(`${API_URL}api/shop/orders/my_orders/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get("api/shop/orders/my_orders/");
       // Sort orders by newest first
       const sortedOrders = res.data.sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
@@ -28,7 +26,7 @@ export default function MyOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, API_URL]);
+  }, []);
 
   useEffect(() => {
     if (token) fetchOrders();

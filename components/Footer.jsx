@@ -21,6 +21,7 @@ export default function Footer() {
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         <div className="flex flex-col items-center">
+          <Link href="/">
           {/* Logo */}
           <div className="mb-8 p-4 l transition-transform hover:scale-105 duration-300">
             <Image
@@ -32,10 +33,10 @@ export default function Footer() {
               className="h-16 w-auto drop-shadow-lg"
             />
           </div>
-
+          </Link>
           {/* Navigation Links */}
           <nav className="mb-10 w-full max-w-3xl">
-            <ul className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-stone-300 font-medium tracking-wide">
+            <ul className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-stone-300 font-medium tracking-wide pl-0">
               <li>
                 <Link
                   href="/"

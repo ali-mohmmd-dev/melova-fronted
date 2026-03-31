@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
+import api from "@/lib/axios";
 
 export default function ProductDetailsClient({ product }) {
   const router = useRouter();
@@ -80,13 +80,9 @@ export default function ProductDetailsClient({ product }) {
     }
 
     try {
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
-
-      await axios.post(
-        `${API_URL}api/shop/cart/add_item/`,
-        { variant_id: selectedVariant.id, quantity: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.post(
+        "api/shop/cart/add_item/",
+        { variant_id: selectedVariant.id, quantity: 1 }
       );
 
       window.dispatchEvent(new Event("cartUpdated"));

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import axios from "axios";
+// import axios from "axios"; // Removed redundant axios import
 import api from "@/lib/axios";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -12,7 +12,6 @@ export default function AdminAddProduct() {
   const { token, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/";
 
   const [variants, setVariants] = useState([
     { id: 0, name: "", gram: "", price: "", isPrimary: true, images: [""] },
@@ -169,16 +168,10 @@ const handleSubmit = async (e) => {
 
     } catch (err) {
       console.error('Submission error:', err);
-
-      // Check if it's an authentication error
-      if (err.message.includes('401') || err.message.includes('Unauthorized') || err.message.includes('token')) {
-        setError('Session expired. Please login again.');
-        logout();
-        setTimeout(() => {
-          router.push('/admin/login?redirect=/admin/products/add');
-        }, 1500);
-      } else {
-        setError(err.message || 'Failed to create product');
+      // The axios interceptor in @/lib/axios.js handles 401/refresh automatically.
+      // We only need to show a general error message here if it's not a 401.
+      if (err.response?.status !== 401) {
+        setError(err.response?.data?.detail || err.message || 'Failed to create product');
       }
     } finally {
       setLoading(false);

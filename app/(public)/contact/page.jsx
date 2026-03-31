@@ -12,7 +12,7 @@ export const metadata = {
 export default function Contact() {
   return (
     <>
-      <div className="page-header bg-section parallaxie">
+      <div className="page-header !pt-[250px] sm:!pt-auto bg-section parallaxie">
         <RevealWrapper className="container">
           <div className="row align-items-center">
             <div className="col-lg-12">

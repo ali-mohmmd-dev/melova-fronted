@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
+import api from "@/lib/axios";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -26,36 +26,29 @@ export default function CheckoutPage() {
     zipCode: "",
   });
 
-  // ✅ Shared clean input style (same as signup)
   const inputClass =
-    "w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-amber-700 focus:bg-white focus:outline-none transition";
+    "w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-amber-700 focus:bg-white focus:outline-none transition-all duration-200";
 
-  // Load Razorpay script
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
-    return () => document.body.removeChild(script);
+    return () => { if (document.body.contains(script)) document.body.removeChild(script); };
   }, []);
 
-  // Load cart + autofill user
   useEffect(() => {
     const fetchCart = async () => {
       if (!token) return;
       try {
-        const res = await axios.get(`${API_URL}api/shop/cart/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("api/shop/cart/");
         setCart(res.data);
       } catch (err) {
         console.error("Error fetching cart for checkout:", err);
       }
     };
 
-    if (token) {
-      fetchCart();
-    }
+    if (token) fetchCart();
 
     if (user) {
       const fullName = (user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`).trim();
@@ -78,23 +71,22 @@ export default function CheckoutPage() {
 
   const nextStep = () => {
     if (step === 1 && !user) {
-      alert("Please login to continue.");
       router.push("/login?redirect=/checkout");
       return;
     }
     setStep((s) => s + 1);
   };
 
-  const prevStep = () => setStep((s) => s - 1);
+  const prevStep = () => {
+    setStep((s) => s - 1);
+  };
 
   const handleSubmitOrder = async () => {
     if (!user || !token) return alert("Login required.");
     if (!cart || cart.items.length === 0) return alert("Cart is empty.");
 
     setIsProcessing(true);
-
     try {
-
       const payload = {
         full_name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
@@ -105,38 +97,26 @@ export default function CheckoutPage() {
         pincode: formData.zipCode,
       };
 
-      const res = await axios.post(
-        `${API_URL}api/shop/cart/checkout/`,
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
+      const res = await api.post("api/shop/cart/checkout/", payload);
       const razorpayOrderId = res.data.razorpay_order_id;
-      const amountInPaise = Math.round(cart.total_price * 100);
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: amountInPaise,
+        amount: Math.round(cart.total_price * 100),
         currency: "INR",
         name: "Melova",
         description: "Melova Chocolate Order",
         order_id: razorpayOrderId,
         handler: async (response) => {
-          const verifyRes = await axios.post(
-            `${API_URL}api/shop/verify-payment/`,
-            {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+          const verifyRes = await api.post("api/shop/verify-payment/", {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          });
 
           if (verifyRes.data.status === "Payment Successful") {
             window.dispatchEvent(new Event("cartUpdated"));
             setStep(3);
-          } else {
-            alert("Payment verification failed.");
           }
         },
         prefill: {
@@ -149,7 +129,6 @@ export default function CheckoutPage() {
 
       new window.Razorpay(options).open();
     } catch (err) {
-      console.error("Order error:", err);
       alert("Order failed. Try again.");
     } finally {
       setIsProcessing(false);
@@ -158,8 +137,8 @@ export default function CheckoutPage() {
 
   if (!cart && step !== 3) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Link href="/products" className="text-amber-800 underline">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+        <Link href="/products" className="text-amber-800 font-medium hover:underline">
           Your cart is empty — Shop now
         </Link>
       </div>
@@ -167,228 +146,139 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-5xl">
-        {/* Back Button */}
+    /* flex items-center justify-center min-h-screen ensures vertical and horizontal centering on PC */
+    <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center py-12 lg:py-24">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Progress Header */}
         {step !== 3 && (
-          <div className="mb-8">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center gap-2 text-gray-500 hover:text-amber-800 transition-colors group"
-            >
-              <i className="fas fa-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
-              <span className="text-sm font-medium">Back to Shopping</span>
-            </button>
-          </div>
-        )}
-
-        <div className="grid lg:grid-cols-12 gap-10">
-        {/* LEFT */}
-        <div className="lg:col-span-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-8">
-            {/* STEP 1 */}
-            {step === 1 && (
-              <form onSubmit={(e) => { e.preventDefault(); nextStep(); }}>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                  Delivery details
-                </h2>
-
-                <div className="space-y-3.5">
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <input
-                      className={inputClass}
-                      placeholder="First name"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    <input
-                      className={inputClass}
-                      placeholder="Last name"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-                  <input
-                    className={inputClass}
-                    placeholder="Email address"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-
-                  <input
-                    className={inputClass}
-                    placeholder="Phone number"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    required
-                  />
-
-                  <input
-                    className={inputClass}
-                    placeholder="Street address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    required
-                  />
-
-                  <div className="grid sm:grid-cols-3 gap-3">
-                    <input
-                      className={inputClass}
-                      placeholder="City"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    <input
-                      className={inputClass}
-                      placeholder="State"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    <input
-                      className={inputClass}
-                      placeholder="ZIP"
-                      name="zipCode"
-                      value={formData.zipCode}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="mt-8 w-full rounded-lg bg-amber-800 py-2.5 text-sm font-semibold text-white hover:bg-amber-900 transition"
-                >
-                  Continue to payment
-                </button>
-              </form>
-            )}
-
-            {/* STEP 2 */}
-            {step === 2 && (
-              <>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                  Review & pay
-                </h2>
-
-                <div className="text-sm text-gray-600 space-y-1 mb-6">
-                  <p className="font-medium text-gray-900">
-                    {formData.firstName} {formData.lastName}
-                  </p>
-                  <p>{formData.address}</p>
-                  <p>
-                    {formData.city}, {formData.state} — {formData.zipCode}
-                  </p>
-                  <p>{formData.phone}</p>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={prevStep}
-                    className="flex-1 rounded-lg border border-gray-200 py-2.5 text-sm font-medium hover:bg-gray-50"
-                  >
-                    Back
-                  </button>
-                  <button
-                    onClick={handleSubmitOrder}
-                    disabled={isProcessing}
-                    className="flex-1 rounded-lg bg-amber-800 py-2.5 text-sm font-semibold text-white hover:bg-amber-900 disabled:opacity-60"
-                  >
-                    {isProcessing
-                      ? "Processing..."
-                      : `Pay ₹${cart.total_price}`}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* STEP 3 */}
-            {step === 3 && (
-              <div className="text-center py-10">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  Order confirmed 🎉
-                </h2>
-                <p className="text-gray-500 mb-6">
-                  We’ve received your order and will email you the details.
-                </p>
-                <Link
-                  href="/products"
-                  className="inline-block rounded-lg bg-amber-800 px-6 py-2.5 text-sm font-semibold text-white hover:bg-amber-900"
-                >
-                  Continue shopping
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT SUMMARY */}
-        {step !== 3 && (
-          <div className="lg:col-span-4">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-10">
-              <h3 className="font-semibold text-gray-900 mb-5">
-                Order summary
-              </h3>
-
-              <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
-                {cart.items.map((item) => (
-                  <div key={item.id} className="flex gap-4 mb-4 items-center">
-                    <div className="w-12 h-12 relative flex-shrink-0">
-                      <Image
-                        src={item.variant_details.images[0]?.image || "/img/placeholder_product.png"}
-                        alt={item.variant_details.name}
-                        fill
-                        quality={90}
-                        className="rounded-lg object-cover border border-gray-100"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {item.variant_details.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {item.quantity} x ₹{item.variant_details.price}
-                      </p>
-                    </div>
-                    <div className="text-sm font-medium text-gray-900">
-                      ₹{item.subtotal}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span>₹{cart.total_price}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Shipping</span>
-                  <span className="text-green-600">Free</span>
-                </div>
-                <div className="flex justify-between font-semibold text-gray-900 pt-3 border-t">
-                  <span>Total</span>
-                  <span>₹{cart.total_price}</span>
-                </div>
-              </div>
+          <div className="flex items-center justify-center mb-8 gap-4 sm:gap-8">
+            <div className="flex items-center gap-2">
+              <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${step >= 1 ? 'bg-amber-800 text-white' : 'bg-gray-200 text-gray-500'}`}>1</span>
+              <span className={`text-xs font-bold uppercase tracking-widest ${step >= 1 ? 'text-amber-900' : 'text-gray-400'}`}>Details</span>
+            </div>
+            <div className="h-px w-12 bg-gray-200"></div>
+            <div className="flex items-center gap-2">
+              <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${step >= 2 ? 'bg-amber-800 text-white' : 'bg-gray-200 text-gray-500'}`}>2</span>
+              <span className={`text-xs font-bold uppercase tracking-widest ${step >= 2 ? 'text-amber-900' : 'text-gray-400'}`}>Payment</span>
             </div>
           </div>
         )}
+
+         {step < 3 && (
+              <button
+                onClick={() => step === 1 ? router.back() : prevStep()}
+                className="mb-6 flex items-center gap-2 text-gray-400 hover:text-amber-800 transition-colors group"
+              >
+                <i className="fas fa-arrow-left text-[10px] group-hover:-translate-x-1 transition-transform"></i>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Go Back</span>
+              </button>
+            )}
+
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT COLUMN: Form or Confirmation */}
+          <div className={`lg:col-span-7 xl:col-span-8 w-full ${step === 3 ? 'lg:col-span-12' : ''}`}>
+            
+           
+
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-10">
+              {step === 1 && (
+                <form onSubmit={(e) => { e.preventDefault(); nextStep(); }}>
+                  <h2 className="text-2xl font-black text-gray-900 mb-8 tracking-tight">Delivery Details</h2>
+                  <div className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <input className={inputClass} placeholder="First Name" name="firstName" value={formData.firstName} onChange={handleInputChange} required />
+                      <input className={inputClass} placeholder="Last Name" name="lastName" value={formData.lastName} onChange={handleInputChange} required />
+                    </div>
+                    <input className={inputClass} placeholder="Email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
+                    <input className={inputClass} placeholder="Phone Number" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} required />
+                    <input className={inputClass} placeholder="Street Address" name="address" value={formData.address} onChange={handleInputChange} required />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <input className={inputClass} placeholder="City" name="city" value={formData.city} onChange={handleInputChange} required />
+                      <input className={inputClass} placeholder="State" name="state" value={formData.state} onChange={handleInputChange} required />
+                      <input className={inputClass} placeholder="PIN Code" name="zipCode" value={formData.zipCode} onChange={handleInputChange} required />
+                    </div>
+                  </div>
+                  <button type="submit" className="mt-10 w-full rounded-2xl bg-amber-800 py-4 text-sm font-bold text-white hover:bg-amber-900 shadow-xl shadow-amber-900/20 transition-all active:scale-[0.98]">
+                    Continue to Payment
+                  </button>
+                </form>
+              )}
+
+              {step === 2 && (
+                <div className="animate-fadeIn">
+                  <h2 className="text-2xl font-black text-gray-900 mb-8 tracking-tight">Review Order</h2>
+                  <div className="bg-stone-50 rounded-2xl p-6 mb-8 border border-stone-100">
+                    <p className="text-[10px] font-bold text-amber-800 uppercase tracking-[0.2em] mb-4">Shipping Information</p>
+                    <p className="text-base font-bold text-gray-900">{formData.firstName} {formData.lastName}</p>
+                    <p className="text-sm text-gray-600 mt-2 leading-relaxed">{formData.address}, {formData.city}, {formData.state} - {formData.zipCode}</p>
+                    <p className="text-sm text-gray-600 mt-1">{formData.phone}</p>
+                  </div>
+                  <button
+                    onClick={handleSubmitOrder}
+                    disabled={isProcessing}
+                    className="w-full rounded-2xl bg-amber-800 py-4 text-sm font-bold text-white hover:bg-amber-900 disabled:opacity-60 shadow-xl shadow-amber-900/20 transition-all"
+                  >
+                    {isProcessing ? "Opening Razorpay..." : `Pay ₹${cart.total_price} via Secure Gateway`}
+                  </button>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="text-center py-10 px-4 max-w-md mx-auto">
+                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                    <i className="fas fa-check text-3xl"></i>
+                  </div>
+                  <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Success!</h2>
+                  <p className="text-gray-500 mb-10 text-sm leading-relaxed">Your artisan chocolates are being prepared. Check <span className="font-bold text-gray-800">{formData.email}</span> for your receipt.</p>
+                  <Link href="/products" className="inline-block w-full rounded-2xl bg-amber-800 py-4 text-sm font-bold text-white hover:bg-amber-900 shadow-lg transition-all">
+                    Back to Gallery
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Summary (Sticky on PC) */}
+          {step < 3 && (
+            <div className="lg:col-span-5 xl:col-span-4 w-full">
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 sticky top-24">
+                <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center justify-between">
+                  Summary
+                  <span className="text-xs font-normal text-gray-400">{cart.items.length} items</span>
+                </h3>
+                <div className="space-y-5 max-h-[350px] overflow-y-auto pr-2 mb-6 scrollbar-hide">
+                  {cart.items.map((item) => (
+                    <div key={item.id} className="flex gap-4 items-center">
+                      <div className="w-14 h-14 relative rounded-xl overflow-hidden border border-gray-50 flex-shrink-0">
+                        <Image src={item.variant_details.images[0]?.image || "/img/placeholder_product.png"} alt={item.variant_details.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-gray-800 truncate">{item.variant_details.name}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">Quantity: {item.quantity}</p>
+                      </div>
+                      <p className="text-xs font-bold text-gray-900">₹{item.subtotal}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3 border-t pt-6">
+                  <div className="flex justify-between text-xs font-medium text-gray-400"><span>Subtotal</span><span className="text-gray-900 font-bold">₹{cart.total_price}</span></div>
+                  <div className="flex justify-between text-xs font-medium text-gray-400"><span>Shipping</span><span className="text-green-600 font-bold tracking-tighter">FREE</span></div>
+                  <div className="flex justify-between text-lg font-black text-gray-900 pt-3 border-t border-dashed">
+                    <span>Total</span>
+                    <span>₹{cart.total_price}</span>
+                  </div>
+                </div>
+                <div className="mt-8 flex items-center justify-center gap-2 opacity-30 grayscale">
+                   <i className="fas fa-lock text-[10px]"></i>
+                   <span className="text-[9px] font-black uppercase tracking-widest">End-to-End Encrypted</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
   );
 }
